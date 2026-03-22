@@ -253,14 +253,14 @@ export default function Sidebar({ mobile = false }) {
               className={({ isActive }) =>
                 `flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 text-[14px] font-semibold backdrop-blur-[2px] ${
                   isActive
-                    ? "bg-[#EBDAA3] text-[#A61E30] shadow-lg shadow-black/30"
-                    : "text-[#A61E30] hover:bg-white/10 hover:text-[#A61E30]"
+                    ? "bg-[#EBDAA3] text-[#A61E30] shadow-lg  shadow-black/30"
+                    : "text-[#FFFF] hover:bg-white/10 hover:text-[#A61E30]"
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <div className="bg-[#F6E9EA] p-1 rounded-[10px] ">
+                  <div className="bg-[#F6E9EA] p-1 rounded-[10px] text-[#A61E30] ">
                     <item.icon size={20} strokeWidth={isActive ? 2.5 : 2} />
                   </div>
                   <span className={({ isActive }) =>
