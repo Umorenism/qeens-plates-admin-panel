@@ -1,7 +1,3 @@
-
-
-
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -33,20 +29,15 @@ export default function Login() {
     setError("");
 
     try {
-      // Call the login API function
       const { user, token } = await loginAdmin({ email, password });
 
-      // Safety check
       if (!token || !user?.id) {
         throw new Error("Invalid response from server – missing token or user data");
       }
 
-      // Update auth context (this also saves to localStorage)
       login({ token, admin: user });
-
       toast.success("Login successful!");
 
-      // Small delay helps avoid race conditions with ProtectedRoute
       setTimeout(() => {
         navigate("/dashboard", { replace: true });
       }, 300);
@@ -90,38 +81,38 @@ export default function Login() {
       )}
 
       <motion.div
-        className="w-full max-w-md p-8 bg-gray-900/40 backdrop-blur-xl rounded-2xl shadow-xl space-y-8 border border-gray-700/50"
+        className="w-full max-w-md p-8 bg-white backdrop-blur-xl rounded-2xl shadow-xl space-y-8 border border-gray-700/50"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
       >
         <div className="text-center">
-          <h1 className="text-orange-500 font-black text-4xl">GIVE A MEAL</h1>
-          <h2 className="text-2xl font-bold text-white mt-3">Admin Login</h2>
-          <p className="text-sm text-gray-300 mt-2">Secure access to dashboard</p>
+          <h1 className="text-[#A61E30] font-black text-4xl">Queen's Plates</h1>
+          <h2 className="text-2xl font-bold text-gray-500 mt-3">Admin Login</h2>
+          <p className="text-sm text-gray-500 mt-2">Secure access to dashboard</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-200">Email</label>
+            <label className="block text-sm font-medium text-gray-500">Email</label>
             <input
               type="email"
-              placeholder="admin@theinnercitymission.net"
+              placeholder="admin@queensplates.com"
               value={email}
               onChange={(e) => setEmail(e.target.value.trim())}
-              className="mt-1 w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              className="mt-1 w-full px-4 py-3  rounded-[40px] rounded-tl-[5px] bg-white border border-gray-500 text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-[#A61E30]"
               required
               autoComplete="email"
             />
           </div>
 
           <div className="relative">
-            <label className="block text-sm font-medium text-gray-200">Password</label>
+            <label className="block text-sm font-medium text-gray-500">Password</label>
             <input
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 pr-12"
+              className="mt-1 w-full px-4 py-3  bg-white border border-gray-500  text-black placeholder-black rounded-[40px] rounded-tl-[5px] focus:outline-none focus:ring-2 focus:ring-[#A61E30] pr-12"
               required
               autoComplete="current-password"
             />
@@ -137,7 +128,7 @@ export default function Login() {
           <motion.button
             type="submit"
             disabled={loading}
-            className="w-full bg-orange-600 text-white py-3 rounded-xl font-semibold hover:bg-orange-700 transition disabled:opacity-60 flex items-center justify-center gap-2"
+            className="w-full bg-[#A61E30] text-white py-3 rounded-xl font-semibold hover:bg-[#8f1624] transition disabled:opacity-60 flex items-center justify-center gap-2"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
