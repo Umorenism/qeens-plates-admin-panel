@@ -33,17 +33,7 @@ export const AuthProvider = ({ children }) => {
     initializeAuth();
   }, []);
 
-  // const login = (data) => {
-  //   // Ensure we are getting the right keys from the API response
-  //   const token = data.token;
-  //   const admin = data.admin || data.user; // Flexibility for 'user' vs 'admin' keys
-
-  //   localStorage.setItem("token", token);
-  //   localStorage.setItem("admin", JSON.stringify(admin));
-    
-  //   setAuth({ token, admin });
-  // };
-
+  
 
   const login = (data) => {
   console.log("AuthContext.login called with:", data);

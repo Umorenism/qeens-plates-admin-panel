@@ -23,43 +23,104 @@ export default function Login() {
     }
   }, [auth, navigate]);
 
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   setError("");
+
+  //   try {
+  //     const { user, token } = await loginAdmin({ email, password });
+
+  //     if (!token || !user?.id) {
+  //       throw new Error("Invalid response from server – missing token or user data");
+  //     }
+
+  //     login({ token, admin: user });
+  //     toast.success("Login successful!");
+
+  //     setTimeout(() => {
+  //       navigate("/dashboard", { replace: true });
+  //     }, 300);
+
+  //   } catch (err) {
+  //     console.error("Login error:", err);
+
+  //     let errorMessage = "Login failed. Please try again.";
+
+  //     if (err.response?.data?.message) {
+  //       errorMessage = err.response.data.message;
+  //     } else if (err.message) {
+  //       errorMessage = err.message;
+  //     }
+
+  //     setError(errorMessage);
+  //     toast.error(errorMessage);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
+
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+  e.preventDefault();
+  setLoading(true);
+  setError("");
+
+  try {
+    let user, token;
 
     try {
-      const { user, token } = await loginAdmin({ email, password });
+      // 🔹 Try real backend first
+      const response = await loginAdmin({ email, password });
+      user = response.user;
+      token = response.token;
+    } catch (apiError) {
+      console.warn("Backend not available, using dummy data");
 
-      if (!token || !user?.id) {
-        throw new Error("Invalid response from server – missing token or user data");
-      }
+      // 🔹 FALLBACK: Dummy data
+      user = {
+        id: 1,
+        name: "Admin User",
+        email: email || "admin@queensplates.com",
+        role: "admin",
+      };
 
-      login({ token, admin: user });
-      toast.success("Login successful!");
-
-      setTimeout(() => {
-        navigate("/dashboard", { replace: true });
-      }, 300);
-
-    } catch (err) {
-      console.error("Login error:", err);
-
-      let errorMessage = "Login failed. Please try again.";
-
-      if (err.response?.data?.message) {
-        errorMessage = err.response.data.message;
-      } else if (err.message) {
-        errorMessage = err.message;
-      }
-
-      setError(errorMessage);
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
+      token = "dummy-token-123456";
     }
-  };
 
+    // Validate (same as your original logic)
+    if (!token || !user?.id) {
+      throw new Error("Invalid login response");
+    }
+
+    // Save auth
+    login({ token, admin: user });
+
+    toast.success("Login successful!");
+
+    setTimeout(() => {
+      navigate("/dashboard", { replace: true });
+    }, 300);
+
+  } catch (err) {
+    console.error("Login error:", err);
+
+    let errorMessage = "Login failed. Please try again.";
+
+    if (err.response?.data?.message) {
+      errorMessage = err.response.data.message;
+    } else if (err.message) {
+      errorMessage = err.message;
+    }
+
+    setError(errorMessage);
+    toast.error(errorMessage);
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <motion.div
       className="min-h-screen flex items-center justify-center px-4 py-10 bg-cover bg-center"

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FiSearch, FiEdit2, FiX } from "react-icons/fi";
 import { BsThreeDotsVertical } from "react-icons/bs";
-
+import img1 from '../assets/chops.png'
 const menuItems = [
   {
     name: "Jollof Rice",

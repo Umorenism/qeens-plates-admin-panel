@@ -30,7 +30,7 @@ export default function App() {
         element={
           // <ProtectedRoute>
           <Dashboard />
-          // </ProtectedRoute>
+        //  </ProtectedRoute>
         }
       >
         <Route index element={<AdminDashboard />} />
