@@ -170,7 +170,7 @@ export default function Login() {
             <label className="block text-sm font-medium text-gray-500">Password</label>
             <input
               type={showPassword ? "text" : "password"}
-              placeholder="••••••••"
+              placeholder="*******"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="mt-1 w-full px-4 py-3  bg-white border border-gray-500  text-black placeholder-black rounded-[40px] rounded-tl-[5px] focus:outline-none focus:ring-2 focus:ring-[#A61E30] pr-12"
@@ -180,7 +180,7 @@ export default function Login() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-10 text-gray-400 hover:text-white transition-colors"
+              className="absolute right-4 top-10 text-gray-400 hover:text-black transition-colors"
             >
               {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
             </button>
