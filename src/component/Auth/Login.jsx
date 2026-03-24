@@ -1,209 +1,134 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { loginAdmin } from "../../api/apiServices";
-import { useAuth } from "../../context/AuthContext";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
-import toast, { Toaster } from "react-hot-toast";
-import loginBg from "../../assets/logo.png";
+
+
+
+
+import React, { useState } from "react";
+import noodles from "../../assets/noodles.svg";
+import wave from "../../assets/wave.svg";
+import logo from "../../assets/adminlogo.svg";
+import { EyeClosed } from "lucide-react";
+import { FaEye, FaEyeSlash } from "react-icons/fa6";
+import { Link } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
-  const { auth, login } = useAuth();
 
-  // Redirect if already logged in
-  useEffect(() => {
-    if (auth?.token && auth?.admin) {
-      navigate("/dashboard", { replace: true });
-    }
-  }, [auth, navigate]);
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setLoading(true);
-  //   setError("");
-
-  //   try {
-  //     const { user, token } = await loginAdmin({ email, password });
-
-  //     if (!token || !user?.id) {
-  //       throw new Error("Invalid response from server – missing token or user data");
-  //     }
-
-  //     login({ token, admin: user });
-  //     toast.success("Login successful!");
-
-  //     setTimeout(() => {
-  //       navigate("/dashboard", { replace: true });
-  //     }, 300);
-
-  //   } catch (err) {
-  //     console.error("Login error:", err);
-
-  //     let errorMessage = "Login failed. Please try again.";
-
-  //     if (err.response?.data?.message) {
-  //       errorMessage = err.response.data.message;
-  //     } else if (err.message) {
-  //       errorMessage = err.message;
-  //     }
-
-  //     setError(errorMessage);
-  //     toast.error(errorMessage);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-
-
-
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
+  // Dummy login (replace with API later)
+  const handleLogin = async () => {
   setError("");
 
+  if (!email || !password) {
+    return setError("All fields are required");
+  }
+
   try {
-    let user, token;
+    // Simulated API delay
+    await new Promise((res) => setTimeout(res, 800));
 
-    try {
-      // 🔹 Try real backend first
-      const response = await loginAdmin({ email, password });
-      user = response.user;
-      token = response.token;
-    } catch (apiError) {
-      console.warn("Backend not available, using dummy data");
+    // Accept ANY email + password (for now)
+    console.log("Login successful");
 
-      // 🔹 FALLBACK: Dummy data
-      user = {
-        id: 1,
-        name: "Admin User",
-        email: email || "admin@queensplates.com",
-        role: "admin",
-      };
+    localStorage.setItem("token", "dummy_token");
 
-      token = "dummy-token-123456";
-    }
-
-    // Validate (same as your original logic)
-    if (!token || !user?.id) {
-      throw new Error("Invalid login response");
-    }
-
-    // Save auth
-    login({ token, admin: user });
-
-    toast.success("Login successful!");
-
-    setTimeout(() => {
-      navigate("/dashboard", { replace: true });
-    }, 300);
+    // Redirect to dashboard
+    window.location.href = "/dashboard";
 
   } catch (err) {
-    console.error("Login error:", err);
-
-    let errorMessage = "Login failed. Please try again.";
-
-    if (err.response?.data?.message) {
-      errorMessage = err.response.data.message;
-    } else if (err.message) {
-      errorMessage = err.message;
-    }
-
-    setError(errorMessage);
-    toast.error(errorMessage);
-  } finally {
-    setLoading(false);
+    setError("Something went wrong");
   }
 };
+
   return (
-    <motion.div
-      className="min-h-screen flex items-center justify-center px-4 py-10 bg-cover bg-center"
-      style={{ backgroundImage: `url(${loginBg})` }}
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-    >
-      <Toaster position="top-center" />
+    <div className="min-h-screen bg-[#e8d5b7] flex items-center justify-center overflow-hidden">
+      <div className="relative w-full h-screen bg-[#e8d5b7] overflow-hidden mx-auto">
 
-      {error && (
-        <motion.div
-          className="absolute top-10 bg-red-100 border border-red-500 text-red-700 px-6 py-3 rounded-md shadow-md z-50"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
-          {error}
-        </motion.div>
-      )}
+        {/* Wave Background */}
+        <img
+          src={wave}
+          alt="wave"
+          className="absolute bottom-0 left-0 w-full h-[440px] object-cover z-[1]"
+        />
 
-      <motion.div
-        className="w-full max-w-md p-8 bg-white backdrop-blur-xl rounded-2xl shadow-xl space-y-8 border border-gray-700/50"
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-      >
-        <div className="text-center">
-          <h1 className="text-[#A61E30] font-black text-4xl">Queen's Plates</h1>
-          <h2 className="text-2xl font-bold text-gray-500 mt-3">Admin Login</h2>
-          <p className="text-sm text-gray-500 mt-2">Secure access to dashboard</p>
+        {/* Noodles Image */}
+        <div className="absolute left-0 bottom-10 z-10">
+          <img
+            src={noodles}
+            alt="noodles"
+            className="w-[528px] h-[528px] object-cover"
+          />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-gray-500">Email</label>
-            <input
-              type="email"
-              placeholder="admin@queensplates.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value.trim())}
-              className="mt-1 w-full px-4 py-3  rounded-[40px] rounded-tl-[5px] bg-white border border-gray-500 text-black placeholder-black focus:outline-none focus:ring-2 focus:ring-[#A61E30]"
-              required
-              autoComplete="email"
-            />
-          </div>
+        {/* Logo */}
+        <div className="absolute top-0 left-16 z-20">
+          <img src={logo} alt="Logo" className="w-[140px] object-contain" />
+        </div>
 
-          <div className="relative">
-            <label className="block text-sm font-medium text-gray-500">Password</label>
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder="*******"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 w-full px-4 py-3  bg-white border border-gray-500  text-black placeholder-black rounded-[40px] rounded-tl-[5px] focus:outline-none focus:ring-2 focus:ring-[#A61E30] pr-12"
-              required
-              autoComplete="current-password"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-10 text-gray-400 hover:text-black transition-colors"
-            >
-              {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-            </button>
-          </div>
+        {/* Login Section */}
+        <div className="absolute right-24 top-1/2 -translate-y-1/2 z-20 w-full max-w-[520px]">
+          <div className="p-10">
+            <h2 className="text-[48px] font-[900] font-dm text-[#3A3A3A] text-center mb-10">
+              Admin Login
+            </h2>
 
-          <motion.button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[#A61E30] text-white py-3 rounded-xl font-semibold hover:bg-[#8f1624] transition disabled:opacity-60 flex items-center justify-center gap-2"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-          >
-            {loading ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Signing in...
-              </>
-            ) : (
-              "Sign In"
-            )}
-          </motion.button>
-        </form>
-      </motion.div>
-    </motion.div>
+            <div className="space-y-5">
+
+              {/* Email */}
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-6 py-4 rounded-[40px] rounded-tl-[5px] bg-gray-100 border border-gray-200 
+                           focus:border-[#a61c2f] focus:bg-white outline-none transition-all text-gray-700"
+              />
+
+              {/* Password with toggle */}
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-tl-[5px] px-6 py-4 rounded-[40px] bg-gray-100 border border-gray-200 
+                             focus:border-[#a61c2f] focus:bg-white outline-none transition-all text-gray-700 pr-12"
+                />
+
+                {/* Toggle Icon */}
+                <span
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-gray-500"
+                >
+                  {showPassword ? <FaEye/> : <FaEyeSlash/>}
+                </span>
+              </div>
+
+              {/* Error */}
+              {error && (
+                <p className="text-red-500 text-sm text-center">{error}</p>
+              )}
+
+              {/* Button */}
+              <button
+                onClick={handleLogin}
+                className="w-full py-2 bg-[#a61c2f] hover:bg-[#8d1828] 
+                           text-white text-lg font-medium rounded-[12px] 
+                           shadow-lg transition-all duration-200 mt-6"
+              >
+                Login
+              </button>
+              <Link to="/forget-password" className="w-full flex justify-end">
+  <p className="text-sm text-red-500 hover:text-gray-700 transition-colors cursor-pointer">
+    Forgot password?
+  </p>
+</Link>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
   );
 }

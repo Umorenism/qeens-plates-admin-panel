@@ -208,14 +208,16 @@ import {
   BarChart3,
   Settings,
   LogOut,
+  
 } from "lucide-react";
 import logo1 from "../../assets/logo.png";
 import bglogo from "../../assets/sidimg.png";
-
+import { IoPersonSharp } from "react-icons/io5";
 const sidebarBg = bglogo;
 
 const navItems = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard, end: true },
+  { to: "/dashboard/admin", label: "Admin Dashboard", icon: IoPersonSharp },
   { to: "/dashboard/orders", label: "Orders", icon: ShoppingCart },
   { to: "/dashboard/menu", label: "Menu Management", icon: UtensilsCrossed },
   { to: "/dashboard/customers", label: "Customers", icon: Users },
