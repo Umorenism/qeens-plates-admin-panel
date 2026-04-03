@@ -1,12 +1,8 @@
 
-
-
-
-
 // apiServices.js
 import axios from "axios";
 
-const base_url = "https://gameapi.theinnercitymission.net";
+const base_url = "https://queensplate-main-jw6so1.free.laravel.cloud/api/v1/";
 
 // ------------------- GENERAL USER API -------------------
 export const apiClient = axios.create({
@@ -47,258 +43,165 @@ adminApi.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ------------------- AUTH -------------------
-
-// Admin login
-// apiServices.js
+// ------------------- AUTH 
 export const loginAdmin = async ({ email, password }) => {
-  console.log("🔑 Sending login request:", { email });
+  console.log("🔑 Attempting admin login for:", email);
 
   try {
-    const res = await apiClient.post("/api/auth/admin/login", { email, password });
-    const { token, admin } = res.data;
+    const res = await apiClient.post("auth/login", { email, password });
+    const responseData = res.data;
 
-    if (!token) throw new Error("No token received from server");
-
-    localStorage.setItem("token", token);                    // consistent key
-    localStorage.setItem("admin", JSON.stringify(admin));
-
-    // Optional: set default header for both clients
-    apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-    adminApi.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-
-    return { user: admin, token };
-  } catch (err) {
-    console.error("❌ Login failed:", err.response?.data || err.message);
-    throw err;
-  }
-};
-
-// Admin registration
-// ------------------- ADMIN REGISTRATION -------------------
-export const registerAdmin = async ({ name, email, password, profilePic }) => {
-  const payload = { name, email, password, profilePic };
-  console.log("📝 [registerAdmin] Sending payload to /api/auth/admin/register:", payload);
-
-  try {
-    const res = await adminApi.post("/api/auth/admin/register", payload);
-    console.log("✅ [registerAdmin] Success response:", res.data);
-    return res.data;
-  } catch (err) {
-    console.error("❌ [registerAdmin] Failed:", err.response?.data || err.message);
-    throw err;
-  }
-};
-
-
-// ------------------- USERS / STATS -------------------
-export const getUserCount = async () => {
-  try {
-    const res = await adminApi.get("/api/admin/users/count");
-    return res.data; // { count: number }
-  } catch (err) {
-    console.error("❌ [getUserCount] Failed:", err.response?.data || err.message);
-    return { count: 0 };
-  }
-};
-
-export const getTotalDonation = async () => {
-  try {
-    const res = await adminApi.get("/api/admin/total-donations");
-    return res.data; // { total: number }
-  } catch (err) {
-    console.error("❌ [getTotalDonation] Failed:", err.response?.data || err.message);
-    return { total: 0 };
-  }
-};
-
-// ------------------- ANALYTICS -------------------
-export const getAnalytics = async () => {
-  try {
-    const res = await adminApi.get("/api/admin/analytics");
-    return {
-      usersCount: res.data.users || 0,
-      donationsTotal: res.data.successfulDonations || 0,
-      campaignsCount: res.data.approvedCampaigns || 0,
-      paymentMethodTotals: res.data.paymentMethodTotals || { paystack: 0, stripe: 0, espee: 0 },
-    };
-  } catch (err) {
-    console.error("❌ [getAnalytics] Failed:", err.response?.data || err.message);
-    return {
-      usersCount: 0,
-      donationsTotal: 0,
-      campaignsCount: 0,
-      paymentMethodTotals: { paystack: 0, stripe: 0, espee: 0 },
-    };
-  }
-};
-
-// ------------------- CAMPAIGNS -------------------
-export const getApprovedCampaigns = async () => {
-  try {
-    const res = await adminApi.get("/api/admin/campaigns/approved");
-    return res.data;
-  } catch (err) {
-    console.error("❌ [getApprovedCampaigns] Failed:", err.response?.data || err.message);
-    throw err;
-  }
-};
-
-export const getAllCampaigns = async () => {
-  try {
-    const res = await adminApi.get("/api/admin/campaigns/all");
-    return res.data;
-  } catch (err) {
-    console.error("❌ [getAllCampaigns] Failed:", err.response?.data || err.message);
-    throw err;
-  }
-};
-
-export const updateCampaignStatus = async (id, isApproved) => {
-  try {
-    const res = await adminApi.put(`/api/admin/campaigns/${id}`, { isApproved });
-    return res.data;
-  } catch (err) {
-    console.error("❌ [updateCampaignStatus] Failed:", err.response?.data || err.message);
-    throw err;
-  }
-};
-
-// ------------------- CAMPAIGNS -------------------
-export const createCampaign = async ({ title, description, imageFile, targetAmount, duration }) => {
-  try {
-    // Use FormData for multipart/form-data (required for files)
-    const formData = new FormData();
-
-    formData.append("title", title.trim());
-    formData.append("description", description.trim());
-    formData.append("targetAmount", Number(targetAmount));   // ensure number
-    formData.append("duration", Number(duration));           // ensure number
-
-    // Only append image if a file was selected
-    if (imageFile && imageFile instanceof File) {
-      formData.append("image", imageFile);                   // field name = "image"
+    if (responseData.success === false) {
+      throw new Error(responseData.message || "Login failed");
     }
 
-    console.log("[createCampaign] Sending FormData – fields:", {
-      title: title.trim(),
-      description: description.trim(),
-      targetAmount,
-      duration,
-      hasImage: !!imageFile,
-    });
+    const data = responseData.data || {};
+    // Extract user_type along with token and user
+    const { access_token, token_type = "Bearer", user, user_type } = data;
 
-    // Important: do NOT set Content-Type header manually → let browser set it with boundary
-    const res = await adminApi.post("/api/admin/campaigns", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",   // optional – axios usually handles it
-      },
-    });
+    if (!access_token) {
+      throw new Error("No access token received");
+    }
 
-    console.log("[createCampaign] Success:", res.data);
-    return res.data;
+   
+    if (user_type !== "admin") {
+      throw new Error("Access denied: You do not have administrator privileges.");
+    }
+
+    const token = access_token;
+
+    // Store data in localStorage
+    localStorage.setItem("token", token);
+    localStorage.setItem("user_type", user_type);
+    localStorage.setItem("user", JSON.stringify(user || {}));
+
+    // Set Authorization headers for both clients
+    const authHeader = `${token_type} ${token}`;
+    apiClient.defaults.headers.common["Authorization"] = authHeader;
+    adminApi.defaults.headers.common["Authorization"] = authHeader;
+
+    console.log("✅ Admin Login successful");
+    return { user, token, token_type, user_type };
+
   } catch (err) {
-    console.error("❌ [createCampaign] Failed:", {
+    console.error("❌ Login error details:", {
       status: err.response?.status,
       data: err.response?.data,
-      message: err.message,
+      message: err.message
     });
-    throw err?.response?.data || err;
-  }
-};
 
-export const approveCampaign = async (id) => {
-  try {
-    const res = await adminApi.patch(`/api/admin/campaigns/${id}/approved`);
-    return res.data;
-  } catch (err) {
-    console.error("❌ [approveCampaign] Failed:", err.response?.data || err.message);
-    throw err;
-  }
-};
+   
+    let errorMsg = err.message || "Invalid credentials or server error";
 
-// ------------------- BLOG -------------------
-export const createBlog = async ({ title, content, image }) => {
-  try {
-    const res = await adminApi.post("/api/admin/blogs", { title, content, image });
-    return res.data;
-  } catch (err) {
-    console.error("❌ [createBlog] Failed:", err.response?.data || err.message);
-    throw err;
-  }
-};
+    if (err.response?.data) {
+      const data = err.response.data;
+      errorMsg = data.message || 
+                 (data.errors && Object.values(data.errors).flat()[0]) ||
+                 errorMsg;
+    }
 
-// ------------------- CAMPAIGN TOGGLE -------------------
-export const toggleCampaignApproval = async (id) => {
-  try {
-    const res = await adminApi.patch(`/api/admin/campaigns/${id}/toggle-approval`);
-    return res.data;
-  } catch (err) {
-    console.error("❌ [toggleCampaignApproval] Failed:", err.response?.data || err.message);
-    throw err;
-  }
-};
-
-// ------------------- ADMIN PROFILE -------------------
-export const getAdminProfile = async () => {
-  try {
-    const res = await adminApi.get("/api/auth/admin/me");
-    return res.data;
-  } catch (err) {
-    console.error("❌ [getAdminProfile] Failed:", err.response?.data || err.message);
-    throw err;
-  }
-};
-
-export const updateAdminProfile = async (data) => {
-  try {
-    const res = await adminApi.put("/api/auth/admin/update-profile", data);
-    return res.data;
-  } catch (err) {
-    console.error("❌ [updateAdminProfile] Failed:", err.response?.data || err.message);
-    throw err;
-  }
-};
-
-// ------------------- DONATIONS -------------------
-export const getAllDonations = async () => {
-  try {
-    const res = await adminApi.get("/api/admin/donations");
-    return res.data; // array of donation objects
-  } catch (err) {
-    console.error("❌ [getAllDonations] Failed:", err.response?.data || err.message);
-    return [];
+    throw new Error(errorMsg);
   }
 };
 
 
-// Notifications
-// apiServices.js – replace the notification functions
 
-export const getNotifications = async () => {
+// ------------------- ADMIN ORDERS API FUNCTIONS -------------------
+export const getAllOrders = async (params = {}) => {
   try {
-    const res = await adminApi.get("/api/admin/notifications");   // ← adminApi
-    return res.data || [];
-  } catch (err) {
-    console.error("[getNotifications] Failed:", err.response?.data || err.message);
-    throw err;
+    const response = await adminApi.get("/admin/orders", { params });
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching orders:", error.response?.data || error.message);
+    throw error;
   }
 };
 
-export const createNotification = async ({ title, message, type }) => {
-  try {
-    const token = localStorage.getItem("token");
-    console.log("[createNotification] Token present?", !!token);
-    console.log("[createNotification] Token preview:", token ? token.substring(0, 20) + "..." : "NO TOKEN");
+export const searchOrders = async (searchTerm) => {
+  return getAllOrders({ search: searchTerm });
+};
 
-    const res = await adminApi.post("/api/admin/notifications", { title, message, type });
-    return res.data;
-  } catch (err) {
-    console.error("[createNotification] Failed:", {
-      status: err.response?.status,
-      data: err.response?.data,
-      message: err.message,
-    });
-    throw err;
+export const filterOrdersByStatus = async (status) => {
+  return getAllOrders({ status: status.toLowerCase() });
+};
+
+export const getOrderById = async (id) => {
+  try {
+    const response = await adminApi.get(`/admin/order/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching order ${id}:`, error.response?.data || error.message);
+    throw error;
   }
+};
+
+
+
+
+
+
+// Get all menu items
+export const getMenuItems = async () => {
+  try {
+    const response = await adminApi.get("/admin/menu-management");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching menu items:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+// Toggle availability (PATCH)
+export const toggleMenuItemStatus = async (id) => {
+  try {
+    const response = await adminApi.patch(`/admin/menu-management/${id}/status`);
+    return response.data;
+  } catch (error) {
+    console.error("Error toggling status:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+
+
+// Add these to your apiServices.js
+
+// Add new menu item
+export const addMenuItem = async (formData) => {
+  const response = await adminApi.post("/admin/menu-management", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
+// Update menu item (using PUT as shown in your earlier test)
+export const updateMenuItem = async (id, formData) => {
+  const response = await adminApi.put(`/admin/menu-management/${id}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
+// Delete menu item
+export const deleteMenuItem = async (id) => {
+  const response = await adminApi.delete(`/admin/menu-management/${id}`);
+  return response.data;
+};
+
+export const getDashboardStats = async () => {
+  const response = await adminApi.get("/admin/dashboard-stats");
+  return response.data;
+};
+
+
+// Get all customers (for sidebar list)
+export const getCustomers = async () => {
+  const response = await adminApi.get("/admin/customers");
+  return response.data;
+};
+
+// Get single customer details
+export const getCustomerById = async (id) => {
+  const response = await adminApi.get(`/admin/customers/${id}`);
+  return response.data;
 };

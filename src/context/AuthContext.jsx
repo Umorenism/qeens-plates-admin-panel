@@ -1,64 +1,4 @@
 
-
-
-
-
-
-// // import React, { createContext, useContext, useState, useEffect } from "react";
-
-// // const AuthContext = createContext();
-
-// // export function AuthProvider({ children }) {
-// //   const [user, setUser] = useState(null);
-// //   const [loading, setLoading] = useState(true); // Add loading state
-
-// //   useEffect(() => {
-// //     const initAuth = () => {
-// //       const admin = localStorage.getItem("admin");
-// //       if (admin) {
-// //         setUser(JSON.parse(admin));
-// //         console.log("Initial user from localStorage:", JSON.parse(admin)); // Debug
-// //       }
-// //       setLoading(false);
-// //     };
-// //     initAuth();
-// //   }, []);
-
-// //   const login = (data) => {
-// //     console.log("Storing in AuthContext:", data);
-// //     if (data.admin && data.access_token) {
-// //       localStorage.setItem("admin", JSON.stringify(data.admin));
-// //       localStorage.setItem("access_token", data.access_token);
-// //       setUser(data.admin);
-// //       console.log("User set in AuthContext:", data.admin);
-// //     } else {
-// //       console.error("Invalid login data:", data);
-// //     }
-// //   };
-
-// //   const logout = () => {
-// //     localStorage.removeItem("admin");
-// //     localStorage.removeItem("access_token");
-// //     setUser(null);
-// //   };
-
-// //   return (
-// //     <AuthContext.Provider value={{ user, login, logout, loading }}>
-// //       {children}
-// //     </AuthContext.Provider>
-// //   );
-// // }
-
-// // export function useAuth() {
-// //   return useContext(AuthContext);
-// // }
-
-
-
-
-
-
-
 // import React, { createContext, useContext, useState, useEffect } from "react";
 
 // const AuthContext = createContext();
@@ -69,38 +9,43 @@
 
 //   useEffect(() => {
 //     const initAuth = () => {
-//       const admin = localStorage.getItem("admin");
-//       if (admin) {
-//         setUser(JSON.parse(admin));
-//         console.log("Initial user from localStorage:", JSON.parse(admin));
+//       const storedUser = localStorage.getItem("user");
+//       const storedToken = localStorage.getItem("token");
+      
+//       if (storedUser && storedToken) {
+//         try {
+//           setUser(JSON.parse(storedUser));
+//         } catch (e) {
+//           console.error("Failed to parse stored user", e);
+//           localStorage.clear();
+//         }
 //       }
 //       setLoading(false);
 //     };
 //     initAuth();
 //   }, []);
 
-//   const login = (data) => {
-//     console.log("Storing in AuthContext:", data);
+//   // const login = (data) => {
+//   //   // Expecting data to have: { user, token, user_type }
+//   //   if (data.user && data.token) {
+//   //     localStorage.setItem("user", JSON.stringify(data.user));
+//   //     localStorage.setItem("token", data.token);
+//   //     localStorage.setItem("user_type", data.user_type || ""); 
+      
+//   //     setUser(data.user);
+//   //   }
+//   // };
 
-//     if (data.access_token) {
-//       localStorage.setItem("access_token", data.access_token);
 
-//       // Use backend admin object if present, else fallback
-//       const adminData =
-//         data.admin || { email: data.email || "unknown", role: "admin" };
-
-//       localStorage.setItem("admin", JSON.stringify(adminData));
-//       setUser(adminData);
-
-//       console.log("User set in AuthContext:", adminData);
-//     } else {
-//       console.error("Invalid login data:", data);
-//     }
-//   };
-
+//   const login = async (userData, token) => {
+//   localStorage.setItem("token", token);
+//   localStorage.setItem("user_type", "admin"); 
+//   setUser(userData); 
+// };
 //   const logout = () => {
-//     localStorage.removeItem("admin");
-//     localStorage.removeItem("access_token");
+//     localStorage.removeItem("user");
+//     localStorage.removeItem("token");
+//     localStorage.removeItem("user_type");
 //     setUser(null);
 //   };
 
@@ -119,47 +64,71 @@
 
 
 
+
 import React, { createContext, useContext, useState, useEffect } from "react";
+import axios from "axios";
 
 const AuthContext = createContext();
+
+const BASE_URL =
+  "https://queensplate-main-jw6so1.free.laravel.cloud/api/v1";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // ✅ Restore session on refresh
   useEffect(() => {
-    const initAuth = () => {
-      const storedUser = localStorage.getItem("user");
-      const storedToken = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+    const storedToken = localStorage.getItem("token");
 
-      if (storedUser && storedToken) {
+    if (storedUser && storedToken) {
+      try {
         setUser(JSON.parse(storedUser));
-        console.log("Initial user from localStorage:", JSON.parse(storedUser));
+      } catch (error) {
+        console.error("Failed to parse stored user");
+        localStorage.clear();
       }
-      setLoading(false);
-    };
-    initAuth();
+    }
+
+    setLoading(false);
   }, []);
 
-  const login = (data) => {
-    console.log("Storing in AuthContext:", data);
+  // ✅ LOGIN
+  const login = (userData, token, userType) => {
+    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("token", token);
+    localStorage.setItem("user_type", userType);
 
-    // ✅ Your backend: { user, token }
-    if (data.user && data.token) {
-      localStorage.setItem("user", JSON.stringify(data.user));
-      localStorage.setItem("token", data.token);
-      setUser(data.user);
-
-      console.log("User set in AuthContext:", data.user);
-    } else {
-      console.error("Invalid login data:", data);
-    }
+    setUser(userData);
   };
 
-  const logout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
+  // ✅ LOGOUT (API + cleanup)
+  const logout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (token) {
+        await axios.post(
+          `${BASE_URL}/auth/logout`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      }
+    } catch (error) {
+      console.warn("Logout API failed (safe fallback logout)");
+    }
+
+    // Always clear storage
+    localStorage.clear();
+
     setUser(null);
+
+    // redirect handled in Sidebar
   };
 
   return (

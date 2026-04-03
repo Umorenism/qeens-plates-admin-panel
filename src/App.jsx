@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import Dashboard from "./component/Dashboard/Dashboard";
-import ProtectedRoute from "./component/Dashboard/ProtectedRoute";
+import ProtectedRoute from "./context/ProtectedRoute";
 import Login from "./component/Auth/Login";
 
 // Pages
@@ -22,33 +22,34 @@ import ForgetPassword from "./component/Auth/Forget";
 
 export default function App() {
   return (
-    <Routes>
-      {/* Public Route */}
+   <Routes>
+      {/* Public Routes */}
       <Route path="/login" element={<Login />} />
-       <Route path="forget-password" element={<ForgetPassword />} />
-      {/* Dashboard Routes */}
+      <Route path="/forget-password" element={<ForgetPassword />} />
+
+      {/* Protected Admin Routes */}
       <Route
         path="/dashboard"
         element={
-          // <ProtectedRoute>
-          <Dashboard />
-        //  </ProtectedRoute>
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
         }
       >
+        {/* All these sub-routes are now protected by the parent ProtectedRoute */}
         <Route index element={<AdminDashboard />} />
         <Route path="orders" element={<OrderPage />} />
-        <Route path="customers" element={<CustomerPage/>} />
-        <Route path="menu" element={<Management/>} />
-        <Route path="analytics" element={<AnalyticsPage/>} />
+        <Route path="customers" element={<CustomerPage />} />
+        <Route path="menu" element={<Management />} />
+        <Route path="analytics" element={<AnalyticsPage />} />
         <Route path="order/:id" element={<OrderDetailInfo />} />
         <Route path="customers/:id" element={<CustomerslInfo />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="settings" element={<Settings />} />
         <Route path="admin" element={<AdminPermission />} />
-       
       </Route>
 
-      {/* Catch all → redirect to login */}
+      {/* Catch all */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
