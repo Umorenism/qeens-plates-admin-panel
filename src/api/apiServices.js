@@ -29,14 +29,27 @@ export const adminApi = axios.create({
 
 // Attach admin token automatically
 // apiServices.js
+// adminApi.interceptors.request.use(
+//   (config) => {
+//     const token = localStorage.getItem("token");          // ← change to "token"
+//     if (token) {
+//       config.headers.Authorization = `Bearer ${token}`;
+//       console.log("[Admin Request] Adding token:", token.substring(0, 20) + "...");
+//     } else {
+//       console.warn("[Admin Request] No token found in localStorage");
+//     }
+//     return config;
+//   },
+//   (error) => Promise.reject(error)
+// );
+
 adminApi.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");          // ← change to "token"
+    const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Accept = "application/json"; // Add this line
       console.log("[Admin Request] Adding token:", token.substring(0, 20) + "...");
-    } else {
-      console.warn("[Admin Request] No token found in localStorage");
     }
     return config;
   },
@@ -44,62 +57,94 @@ adminApi.interceptors.request.use(
 );
 
 // ------------------- AUTH 
-export const loginAdmin = async ({ email, password }) => {
-  console.log("🔑 Attempting admin login for:", email);
+// export const loginAdmin = async ({ email, password }) => {
+//   console.log("🔑 Attempting admin login for:", email);
 
-  try {
-    const res = await apiClient.post("auth/login", { email, password });
-    const responseData = res.data;
+//   try {
+//     const res = await apiClient.post("auth/login", { email, password });
+//     const responseData = res.data;
 
-    if (responseData.success === false) {
-      throw new Error(responseData.message || "Login failed");
-    }
+//     if (responseData.success === false) {
+//       throw new Error(responseData.message || "Login failed");
+//     }
 
-    const data = responseData.data || {};
-    // Extract user_type along with token and user
-    const { access_token, token_type = "Bearer", user, user_type } = data;
+//     const data = responseData.data || {};
+//     // Extract user_type along with token and user
+//     const { access_token, token_type = "Bearer", user, user_type } = data;
 
-    if (!access_token) {
-      throw new Error("No access token received");
-    }
+//     if (!access_token) {
+//       throw new Error("No access token received");
+//     }
 
    
-    if (user_type !== "admin") {
-      throw new Error("Access denied: You do not have administrator privileges.");
+//     if (user_type !== "admin") {
+//       throw new Error("Access denied: You do not have administrator privileges.");
+//     }
+
+//     const token = access_token;
+
+//     // Store data in localStorage
+//     localStorage.setItem("token", token);
+//     localStorage.setItem("user_type", user_type);
+//     localStorage.setItem("user", JSON.stringify(user || {}));
+
+//     // Set Authorization headers for both clients
+//     const authHeader = `${token_type} ${token}`;
+//     apiClient.defaults.headers.common["Authorization"] = authHeader;
+//     adminApi.defaults.headers.common["Authorization"] = authHeader;
+
+//     console.log("✅ Admin Login successful");
+//     return { user, token, token_type, user_type };
+
+//   } catch (err) {
+//     console.error("❌ Login error details:", {
+//       status: err.response?.status,
+//       data: err.response?.data,
+//       message: err.message
+//     });
+
+   
+//     let errorMsg = err.message || "Invalid credentials or server error";
+
+//     if (err.response?.data) {
+//       const data = err.response.data;
+//       errorMsg = data.message || 
+//                  (data.errors && Object.values(data.errors).flat()[0]) ||
+//                  errorMsg;
+//     }
+
+//     throw new Error(errorMsg);
+//   }
+// };
+
+
+export const loginAdmin = async ({ email, password }) => {
+  try {
+    const res = await apiClient.post("auth/login", { email, password });
+    const { success, data, message } = res.data;
+
+    if (!success) throw new Error(message || "Login failed");
+
+    const { access_token, user, user_type } = data;
+
+    // ✅ Allow both admin and superadmin to access the dashboard
+    if (user_type !== "admin" && user_type !== "superadmin") {
+      throw new Error("Access denied: Insufficient privileges.");
     }
 
-    const token = access_token;
-
-    // Store data in localStorage
-    localStorage.setItem("token", token);
+    // ✅ Store the critical data
+    localStorage.setItem("token", access_token);
     localStorage.setItem("user_type", user_type);
-    localStorage.setItem("user", JSON.stringify(user || {}));
+    localStorage.setItem("user", JSON.stringify(user));
 
-    // Set Authorization headers for both clients
-    const authHeader = `${token_type} ${token}`;
+    // ✅ Update Axios headers immediately for current session
+    const authHeader = `Bearer ${access_token}`;
     apiClient.defaults.headers.common["Authorization"] = authHeader;
     adminApi.defaults.headers.common["Authorization"] = authHeader;
 
-    console.log("✅ Admin Login successful");
-    return { user, token, token_type, user_type };
-
+    return { user, token: access_token, user_type };
   } catch (err) {
-    console.error("❌ Login error details:", {
-      status: err.response?.status,
-      data: err.response?.data,
-      message: err.message
-    });
-
-   
-    let errorMsg = err.message || "Invalid credentials or server error";
-
-    if (err.response?.data) {
-      const data = err.response.data;
-      errorMsg = data.message || 
-                 (data.errors && Object.values(data.errors).flat()[0]) ||
-                 errorMsg;
-    }
-
+    const errorMsg = err.response?.data?.message || err.message;
     throw new Error(errorMsg);
   }
 };
@@ -204,4 +249,35 @@ export const getCustomers = async () => {
 export const getCustomerById = async (id) => {
   const response = await adminApi.get(`/admin/customers/${id}`);
   return response.data;
+};
+
+
+
+// ------------------- ADMIN MANAGEMENT API -------------------
+
+export const getAdmins = async (page = 1) => {
+  const res = await adminApi.get(`/superadmin/admin-management?page=${page}`);
+  return res.data;
+};
+
+export const createAdmin = async (adminData) => {
+  const res = await adminApi.post("/superadmin/admin-management", adminData);
+  return res.data;
+};
+
+export const updateAdmin = async (id, adminData) => {
+  const res = await adminApi.put(`/superadmin/admin-management/${id}`, adminData);
+  return res.data;
+};
+
+export const deleteAdmin = async (id, password) => {
+  const res = await adminApi.delete(`/superadmin/admin-management/${id}`, {
+    data: { password }
+  });
+  return res.data;
+};
+
+export const resetAdminPassword = async (id, password) => {
+  const res = await adminApi.post(`/superadmin/admin-management/${id}/reset`, { password });
+  return res.data;
 };
