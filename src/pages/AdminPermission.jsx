@@ -924,18 +924,313 @@
 
 
 
+// import React, { useState, useEffect } from "react";
+// import { FiSearch, FiEdit2, FiRefreshCw, FiTrash2 } from "react-icons/fi";
+// import { getAdmins, createAdmin, updateAdmin, deleteAdmin, resetAdminPassword } from "../api/apiServices"; 
+// import toast from "react-hot-toast";
+
+// export default function AdminPermission() {
+//   const [searchTerm, setSearchTerm] = useState("");
+//   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+//   const [admins, setAdmins] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [totalAdmins, setTotalAdmins] = useState(0);
+//   const [editingId, setEditingId] = useState(null);
+
+//   const [newItem, setNewItem] = useState({
+//     name: "",
+//     email: "",
+//     phone: "",
+//     password: "",
+//   });
+
+//   // Fetch Admins on Mount
+//   const fetchAdmins = async () => {
+//     setLoading(true);
+//     try {
+//       const res = await getAdmins();
+//       if (res.success) {
+//         // Mapping Laravel paginated data: res.data.data
+//         setAdmins(res.data.data || []);
+//         setTotalAdmins(res.data.total || 0);
+//       }
+//     } catch (err) {
+//       toast.error("Failed to fetch admins");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchAdmins();
+//   }, []);
+
+//   const handleInputChange = (e) => {
+//     const { name, value } = e.target;
+//     setNewItem((prev) => ({ ...prev, [name]: value }));
+//   };
+
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     try {
+//       if (editingId) {
+//         // Update existing admin
+//         await updateAdmin(editingId, {
+//           name: newItem.name,
+//           email: newItem.email,
+//           phone: newItem.phone,
+//           // Only send password if the user typed a new one
+//           ...(newItem.password && { password: newItem.password })
+//         });
+//         toast.success("Admin updated successfully");
+//       } else {
+//         // Create new admin
+//         await createAdmin(newItem);
+//         toast.success("Admin created successfully");
+//       }
+//       setIsAddModalOpen(false);
+//       setEditingId(null);
+//       setNewItem({ name: "", email: "", phone: "", password: "" });
+//       fetchAdmins();
+//     } catch (err) {
+//       toast.error(err.response?.data?.message || "Operation failed");
+//     }
+//   };
+
+//   const handleEditClick = (admin) => {
+//     setEditingId(admin.id);
+//     setNewItem({
+//       name: admin.name,
+//       email: admin.email,
+//       phone: admin.phone || "",
+//       password: "", 
+//     });
+//     setIsAddModalOpen(true);
+//   };
+
+//   const handleDelete = async (id) => {
+//     const password = prompt("Please enter YOUR password to confirm deletion:");
+//     if (!password) return;
+//     try {
+//       await deleteAdmin(id, password);
+//       toast.success("Admin deleted");
+//       fetchAdmins();
+//     } catch (err) {
+//       toast.error(err.response?.data?.message || "Deletion failed. Check your password.");
+//     }
+//   };
+
+//   const handleResetPassword = async (id) => {
+//     const newPass = prompt("Enter new password for this admin:");
+//     if (!newPass) return;
+//     try {
+//       await resetAdminPassword(id, newPass);
+//       toast.success("Password reset successfully");
+//     } catch (err) {
+//       toast.error("Reset failed");
+//     }
+//   };
+
+//   const getInitials = (name) => name?.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2) || "??";
+
+//   return (
+//     <div className="min-h-screen bg-[#f4efe6] p-6 md:p-8 font-sans">
+//       <div className="max-w-7xl mx-auto space-y-6">
+//         {/* Header */}
+//         <div className="flex mt-10 flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+//           <div>
+//             <h1 className="text-3xl md:text-[32px] font-bold text-gray-900 font-roboto">
+//               Admin Management
+//             </h1>
+//             <p className="mt-1 text-sm text-gray-600">
+//               {totalAdmins} admin accounts
+//             </p>
+//           </div>
+
+//           {/* Create Button - Always visible for Super Admins */}
+//           <button
+//             onClick={() => {
+//               setEditingId(null);
+//               setNewItem({ name: "", email: "", phone: "", password: "" });
+//               setIsAddModalOpen(true);
+//             }}
+//             className="bg-[#D4AF37] hover:bg-[#c09b2f] text-white px-5 py-2.5 rounded-xl md:rounded-[14px] text-sm md:text-[13px] font-medium shadow-sm transition-colors flex items-center gap-1.5"
+//           >
+//             + Create Admin
+//           </button>
+//         </div>
+
+//         {/* Search */}
+//         <div className="relative w-full">
+//           <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
+//           <input
+//             type="text"
+//             placeholder="Search admins by name..."
+//             value={searchTerm}
+//             onChange={(e) => setSearchTerm(e.target.value)}
+//             className="pl-10 pr-4 py-2 w-full bg-white border shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px] font-dm"
+//           />
+//         </div>
+
+//         <div className="bg-[#f7f7f7] rounded-2xl p-6 shadow-sm border border-gray-200 overflow-x-auto">
+//           <table className="w-full text-left border-separate border-spacing-y-4">
+//             <thead>
+//               <tr className="text-gray-500 text-sm">
+//                 <th className="px-2">ADMIN ID</th>
+//                 <th className="px-2">NAME</th>
+//                 <th className="px-2">EMAIL ADDRESS</th>
+//                 <th className="px-2">PHONE</th>
+//                 <th className="px-2">STATUS</th>
+//                 <th className="px-2">CREATED</th>
+//                 <th className="px-2">ACTION</th>
+//               </tr>
+//             </thead>
+
+//             <tbody>
+//               {loading ? (
+//                 <tr><td colSpan="7" className="text-center py-10 text-gray-400">Loading admins...</td></tr>
+//               ) : (
+//                 admins
+//                 .filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+//                 .map((admin) => (
+//                   <tr key={admin.id} className="text-sm bg-white shadow-sm">
+//                     <td className="py-4 text-gray-500 px-4 rounded-l-lg">#{admin.id}</td>
+//                     <td className="py-4 px-2 flex items-center gap-3">
+//                       <div className="w-8 h-8 flex items-center justify-center rounded-full text-gray-500 bg-gray-200 font-dm text-xs font-semibold">
+//                         {getInitials(admin.name)}
+//                       </div>
+//                       <span className="text-gray-700 font-medium">{admin.name}</span>
+//                     </td>
+//                     <td className="py-4 px-2 text-gray-600">{admin.email}</td>
+//                     <td className="py-4 px-2 text-gray-600">{admin.phone || "N/A"}</td>
+//                     <td className="py-4 px-2">
+//                       <span className={`px-3 py-1 text-xs rounded-full bg-green-100 text-green-600`}>
+//                         Active
+//                       </span>
+//                     </td>
+//                     <td className="py-4 px-2 text-gray-500">
+//                       {new Date(admin.created_at).toLocaleDateString()}
+//                     </td>
+//                     <td className="py-4 px-2 rounded-r-lg flex items-center gap-3 text-gray-500">
+//                       <FiEdit2 className="cursor-pointer hover:text-black" onClick={() => handleEditClick(admin)} />
+//                       <FiRefreshCw className="cursor-pointer hover:text-blue-500" title="Reset Password" onClick={() => handleResetPassword(admin.id)} />
+//                       <FiTrash2 className="text-red-500 cursor-pointer hover:text-red-700" onClick={() => handleDelete(admin.id)} />
+//                     </td>
+//                   </tr>
+//                 ))
+//               )}
+//             </tbody>
+//           </table>
+//         </div>
+
+//         {/* Create/Edit Modal */}
+//         {isAddModalOpen && (
+//           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+//             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-200">
+//               <div className="px-6 py-4 bg-white border-b">
+//                 <h2 className="text-xl font-bold text-center text-[#A61E30] mt-2">
+//                   {editingId ? "Update Admin" : "Create Admin"}
+//                 </h2>
+//               </div>
+
+//               <form onSubmit={handleSubmit} className="p-6 space-y-4">
+//                 <input
+//                   type="text"
+//                   name="name"
+//                   value={newItem.name}
+//                   onChange={handleInputChange}
+//                   placeholder="Full Name"
+//                   required
+//                   className="px-4 py-2 w-full border bg-white shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px] font-dm"
+//                 />
+//                 <input
+//                   type="email"
+//                   name="email"
+//                   value={newItem.email}
+//                   onChange={handleInputChange}
+//                   placeholder="Email Address"
+//                   required
+//                   className="px-4 py-2 w-full border bg-white shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px] font-dm"
+//                 />
+//                 <input
+//                   type="text"
+//                   name="phone"
+//                   value={newItem.phone}
+//                   onChange={handleInputChange}
+//                   placeholder="Phone Number"
+//                   required
+//                   className="px-4 py-2 w-full border bg-white shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px] font-dm"
+//                 />
+//                 <input
+//                   type="password"
+//                   name="password"
+//                   value={newItem.password}
+//                   onChange={handleInputChange}
+//                   placeholder={editingId ? "New Password (optional)" : "Password"}
+//                   required={!editingId}
+//                   className="px-4 py-2 w-full border bg-white shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px] font-dm"
+//                 />
+
+//                 <div className="flex justify-end gap-3 pt-4">
+//                   <button
+//                     type="button"
+//                     onClick={() => setIsAddModalOpen(false)}
+//                     className="px-6 py-2 text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+//                   >
+//                     Cancel
+//                   </button>
+//                   <button
+//                     type="submit"
+//                     className="px-6 py-2 bg-[#A61E30] text-white rounded-xl hover:bg-red-800 transition-colors"
+//                   >
+//                     {editingId ? "Update" : "Create"}
+//                   </button>
+//                 </div>
+//               </form>
+//             </div>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+
+
+
 import React, { useState, useEffect } from "react";
-import { FiSearch, FiEdit2, FiRefreshCw, FiTrash2 } from "react-icons/fi";
-import { getAdmins, createAdmin, updateAdmin, deleteAdmin, resetAdminPassword } from "../api/apiServices"; 
+import {
+  FiSearch,
+  FiEdit2,
+  FiRefreshCw,
+  FiTrash2,
+} from "react-icons/fi";
+import {
+  getAdmins,
+  createAdmin,
+  updateAdmin,
+  deleteAdmin,
+  resetAdminPassword,
+} from "../api/apiServices";
+
 import toast from "react-hot-toast";
 
 export default function AdminPermission() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const [totalAdmins, setTotalAdmins] = useState(0);
+
   const [editingId, setEditingId] = useState(null);
+
+  const [submitting, setSubmitting] = useState(false);
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const [newItem, setNewItem] = useState({
     name: "",
@@ -944,13 +1239,14 @@ export default function AdminPermission() {
     password: "",
   });
 
-  // Fetch Admins on Mount
+  // FETCH ADMINS
   const fetchAdmins = async () => {
     setLoading(true);
+
     try {
       const res = await getAdmins();
+
       if (res.success) {
-        // Mapping Laravel paginated data: res.data.data
         setAdmins(res.data.data || []);
         setTotalAdmins(res.data.total || 0);
       }
@@ -965,93 +1261,151 @@ export default function AdminPermission() {
     fetchAdmins();
   }, []);
 
+  // HANDLE INPUT CHANGE
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewItem((prev) => ({ ...prev, [name]: value }));
+
+    setNewItem((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
+  // CREATE / UPDATE ADMIN
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
+      setSubmitting(true);
+
       if (editingId) {
-        // Update existing admin
         await updateAdmin(editingId, {
           name: newItem.name,
           email: newItem.email,
           phone: newItem.phone,
-          // Only send password if the user typed a new one
-          ...(newItem.password && { password: newItem.password })
+          ...(newItem.password && {
+            password: newItem.password,
+          }),
         });
+
         toast.success("Admin updated successfully");
       } else {
-        // Create new admin
         await createAdmin(newItem);
+
         toast.success("Admin created successfully");
       }
+
       setIsAddModalOpen(false);
+
       setEditingId(null);
-      setNewItem({ name: "", email: "", phone: "", password: "" });
+
+      setNewItem({
+        name: "",
+        email: "",
+        phone: "",
+        password: "",
+      });
+
       fetchAdmins();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Operation failed");
+      toast.error(
+        err.response?.data?.message ||
+          "Permission denied — Superadmin required"
+      );
+    } finally {
+      setSubmitting(false);
     }
   };
 
+  // EDIT ADMIN
   const handleEditClick = (admin) => {
     setEditingId(admin.id);
+
     setNewItem({
       name: admin.name,
       email: admin.email,
       phone: admin.phone || "",
-      password: "", 
+      password: "",
     });
+
     setIsAddModalOpen(true);
   };
 
+  // DELETE ADMIN
   const handleDelete = async (id) => {
-    const password = prompt("Please enter YOUR password to confirm deletion:");
+    const password = prompt(
+      "Please enter YOUR password to confirm deletion:"
+    );
+
     if (!password) return;
+
     try {
       await deleteAdmin(id, password);
+
       toast.success("Admin deleted");
+
       fetchAdmins();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Deletion failed. Check your password.");
+      toast.error(
+        err.response?.data?.message ||
+          "Deletion failed. Check your password."
+      );
     }
   };
 
+  // RESET PASSWORD
   const handleResetPassword = async (id) => {
-    const newPass = prompt("Enter new password for this admin:");
+    const newPass = prompt(
+      "Enter new password for this admin:"
+    );
+
     if (!newPass) return;
+
     try {
       await resetAdminPassword(id, newPass);
+
       toast.success("Password reset successfully");
     } catch (err) {
       toast.error("Reset failed");
     }
   };
 
-  const getInitials = (name) => name?.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2) || "??";
+  const getInitials = (name) =>
+    name
+      ?.split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2) || "??";
 
   return (
     <div className="min-h-screen bg-[#f4efe6] p-6 md:p-8 font-sans">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
+
+        {/* HEADER */}
         <div className="flex mt-10 flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-3xl md:text-[32px] font-bold text-gray-900 font-roboto">
               Admin Management
             </h1>
+
             <p className="mt-1 text-sm text-gray-600">
               {totalAdmins} admin accounts
             </p>
           </div>
 
-          {/* Create Button - Always visible for Super Admins */}
+          {/* CREATE BUTTON */}
           <button
             onClick={() => {
               setEditingId(null);
-              setNewItem({ name: "", email: "", phone: "", password: "" });
+
+              setNewItem({
+                name: "",
+                email: "",
+                phone: "",
+                password: "",
+              });
+
               setIsAddModalOpen(true);
             }}
             className="bg-[#D4AF37] hover:bg-[#c09b2f] text-white px-5 py-2.5 rounded-xl md:rounded-[14px] text-sm md:text-[13px] font-medium shadow-sm transition-colors flex items-center gap-1.5"
@@ -1060,25 +1414,30 @@ export default function AdminPermission() {
           </button>
         </div>
 
-        {/* Search */}
+        {/* SEARCH */}
         <div className="relative w-full">
           <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
+
           <input
             type="text"
             placeholder="Search admins by name..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-4 py-2 w-full bg-white border shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px] font-dm"
+            onChange={(e) =>
+              setSearchTerm(e.target.value)
+            }
+            className="pl-10 pr-4 py-2 w-full bg-white border shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px]"
           />
         </div>
 
+        {/* TABLE */}
         <div className="bg-[#f7f7f7] rounded-2xl p-6 shadow-sm border border-gray-200 overflow-x-auto">
           <table className="w-full text-left border-separate border-spacing-y-4">
+
             <thead>
               <tr className="text-gray-500 text-sm">
                 <th className="px-2">ADMIN ID</th>
                 <th className="px-2">NAME</th>
-                <th className="px-2">EMAIL ADDRESS</th>
+                <th className="px-2">EMAIL</th>
                 <th className="px-2">PHONE</th>
                 <th className="px-2">STATUS</th>
                 <th className="px-2">CREATED</th>
@@ -1088,104 +1447,198 @@ export default function AdminPermission() {
 
             <tbody>
               {loading ? (
-                <tr><td colSpan="7" className="text-center py-10 text-gray-400">Loading admins...</td></tr>
+                <tr>
+                  <td
+                    colSpan="7"
+                    className="text-center py-10 text-gray-400"
+                  >
+                    Loading admins...
+                  </td>
+                </tr>
               ) : (
                 admins
-                .filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
-                .map((admin) => (
-                  <tr key={admin.id} className="text-sm bg-white shadow-sm">
-                    <td className="py-4 text-gray-500 px-4 rounded-l-lg">#{admin.id}</td>
-                    <td className="py-4 px-2 flex items-center gap-3">
-                      <div className="w-8 h-8 flex items-center justify-center rounded-full text-gray-500 bg-gray-200 font-dm text-xs font-semibold">
-                        {getInitials(admin.name)}
-                      </div>
-                      <span className="text-gray-700 font-medium">{admin.name}</span>
-                    </td>
-                    <td className="py-4 px-2 text-gray-600">{admin.email}</td>
-                    <td className="py-4 px-2 text-gray-600">{admin.phone || "N/A"}</td>
-                    <td className="py-4 px-2">
-                      <span className={`px-3 py-1 text-xs rounded-full bg-green-100 text-green-600`}>
-                        Active
-                      </span>
-                    </td>
-                    <td className="py-4 px-2 text-gray-500">
-                      {new Date(admin.created_at).toLocaleDateString()}
-                    </td>
-                    <td className="py-4 px-2 rounded-r-lg flex items-center gap-3 text-gray-500">
-                      <FiEdit2 className="cursor-pointer hover:text-black" onClick={() => handleEditClick(admin)} />
-                      <FiRefreshCw className="cursor-pointer hover:text-blue-500" title="Reset Password" onClick={() => handleResetPassword(admin.id)} />
-                      <FiTrash2 className="text-red-500 cursor-pointer hover:text-red-700" onClick={() => handleDelete(admin.id)} />
-                    </td>
-                  </tr>
-                ))
+                  .filter((item) =>
+                    item.name
+                      .toLowerCase()
+                      .includes(searchTerm.toLowerCase())
+                  )
+                  .map((admin) => (
+                    <tr
+                      key={admin.id}
+                      className="text-sm bg-white shadow-sm"
+                    >
+                      <td className="py-4 text-gray-500 px-4 rounded-l-lg">
+                        #{admin.id}
+                      </td>
+
+                      <td className="py-4 px-2 flex items-center gap-3">
+                        <div className="w-8 h-8 flex items-center justify-center rounded-full text-gray-500 bg-gray-200 text-xs font-semibold">
+                          {getInitials(admin.name)}
+                        </div>
+
+                        <span className="text-gray-700 font-medium">
+                          {admin.name}
+                        </span>
+                      </td>
+
+                      <td className="py-4 px-2 text-gray-600">
+                        {admin.email}
+                      </td>
+
+                      <td className="py-4 px-2 text-gray-600">
+                        {admin.phone || "N/A"}
+                      </td>
+
+                      <td className="py-4 px-2">
+                        <span className="px-3 py-1 text-xs rounded-full bg-green-100 text-green-600">
+                          Active
+                        </span>
+                      </td>
+
+                      <td className="py-4 px-2 text-gray-500">
+                        {new Date(
+                          admin.created_at
+                        ).toLocaleDateString()}
+                      </td>
+
+                      <td className="py-4 px-2 flex gap-3 text-gray-500">
+
+                        <FiEdit2
+                          className="cursor-pointer hover:text-black"
+                          onClick={() =>
+                            handleEditClick(admin)
+                          }
+                        />
+
+                        <FiRefreshCw
+                          className="cursor-pointer hover:text-blue-500"
+                          onClick={() =>
+                            handleResetPassword(admin.id)
+                          }
+                        />
+
+                        <FiTrash2
+                          className="text-red-500 cursor-pointer hover:text-red-700"
+                          onClick={() =>
+                            handleDelete(admin.id)
+                          }
+                        />
+
+                      </td>
+                    </tr>
+                  ))
               )}
             </tbody>
           </table>
         </div>
 
-        {/* Create/Edit Modal */}
+        {/* MODAL */}
         {isAddModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-200">
-              <div className="px-6 py-4 bg-white border-b">
+
+              <div className="px-6 py-4 border-b">
                 <h2 className="text-xl font-bold text-center text-[#A61E30] mt-2">
-                  {editingId ? "Update Admin" : "Create Admin"}
+                  {editingId
+                    ? "Update Admin"
+                    : "Create Admin"}
                 </h2>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <form
+                onSubmit={handleSubmit}
+                className="p-6 space-y-4"
+              >
+
                 <input
-                  type="text"
                   name="name"
                   value={newItem.name}
                   onChange={handleInputChange}
                   placeholder="Full Name"
                   required
-                  className="px-4 py-2 w-full border bg-white shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px] font-dm"
+                  className="px-4 py-2 w-full border shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px]"
                 />
+
                 <input
-                  type="email"
                   name="email"
                   value={newItem.email}
                   onChange={handleInputChange}
                   placeholder="Email Address"
                   required
-                  className="px-4 py-2 w-full border bg-white shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px] font-dm"
+                  className="px-4 py-2 w-full border shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px]"
                 />
+
                 <input
-                  type="text"
                   name="phone"
                   value={newItem.phone}
                   onChange={handleInputChange}
                   placeholder="Phone Number"
                   required
-                  className="px-4 py-2 w-full border bg-white shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px] font-dm"
-                />
-                <input
-                  type="password"
-                  name="password"
-                  value={newItem.password}
-                  onChange={handleInputChange}
-                  placeholder={editingId ? "New Password (optional)" : "Password"}
-                  required={!editingId}
-                  className="px-4 py-2 w-full border bg-white shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px] font-dm"
+                  className="px-4 py-2 w-full border shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px]"
                 />
 
-                <div className="flex justify-end gap-3 pt-4">
+                {/* PASSWORD FIELD */}
+                <div className="relative">
+
+                  <input
+                    type={
+                      showPassword
+                        ? "text"
+                        : "password"
+                    }
+                    name="password"
+                    value={newItem.password}
+                    onChange={handleInputChange}
+                    placeholder={
+                      editingId
+                        ? "New Password (optional)"
+                        : "Password"
+                    }
+                    required={!editingId}
+                    className="px-4 py-2 w-full border shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px]"
+                  />
+
                   <button
                     type="button"
-                    onClick={() => setIsAddModalOpen(false)}
-                    className="px-6 py-2 text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+                    onClick={() =>
+                      setShowPassword(!showPassword)
+                    }
+                    className="absolute right-4 top-2 text-sm text-gray-400"
+                  >
+                    {showPassword
+                      ? "Hide"
+                      : "Show"}
+                  </button>
+
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4">
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setIsAddModalOpen(false)
+                    }
+                    className="px-6 py-2 text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200"
                   >
                     Cancel
                   </button>
+
                   <button
                     type="submit"
-                    className="px-6 py-2 bg-[#A61E30] text-white rounded-xl hover:bg-red-800 transition-colors"
+                    disabled={submitting}
+                    className="px-6 py-2 bg-[#A61E30] text-white rounded-xl hover:bg-red-800"
                   >
-                    {editingId ? "Update" : "Create"}
+                    {submitting
+                      ? "Processing..."
+                      : editingId
+                      ? "Update"
+                      : "Create"}
                   </button>
+
                 </div>
+
               </form>
             </div>
           </div>
