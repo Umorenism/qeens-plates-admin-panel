@@ -211,21 +211,21 @@ export const toggleMenuItemStatus = async (id) => {
 
 // Add these to your apiServices.js
 
-// Add new menu item
-export const addMenuItem = async (formData) => {
-  const response = await adminApi.post("/admin/menu-management", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  return response.data;
-};
+// // Add new menu item
+// export const addMenuItem = async (formData) => {
+//   const response = await adminApi.post("/admin/menu-management", formData, {
+//     headers: { "Content-Type": "multipart/form-data" },
+//   });
+//   return response.data;
+// };
 
-// Update menu item (using PUT as shown in your earlier test)
-export const updateMenuItem = async (id, formData) => {
-  const response = await adminApi.put(`/admin/menu-management/${id}`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  return response.data;
-};
+// // Update menu item (using PUT as shown in your earlier test)
+// export const updateMenuItem = async (id, formData) => {
+//   const response = await adminApi.put(`/admin/menu-management/${id}`, formData, {
+//     headers: { "Content-Type": "multipart/form-data" },
+//   });
+//   return response.data;
+// };
 
 // Delete menu item
 export const deleteMenuItem = async (id) => {
@@ -280,4 +280,24 @@ export const deleteAdmin = async (id, password) => {
 export const resetAdminPassword = async (id, password) => {
   const res = await adminApi.post(`/superadmin/admin-management/${id}/reset`, { password });
   return res.data;
+};
+
+
+
+// Add new menu item
+export const addMenuItem = async (formData) => {
+  const response = await adminApi.post("/admin/menu-management", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
+// Update menu item
+export const updateMenuItem = async (id, formData) => {
+  // We use POST here because of the image upload issue with PUT in many frameworks
+  // The component appends data.append("_method", "PUT") to satisfy the server's PUT requirement
+  const response = await adminApi.post(`/admin/menu-management/${id}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
 };
