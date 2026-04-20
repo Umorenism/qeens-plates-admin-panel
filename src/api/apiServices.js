@@ -120,35 +120,56 @@ adminApi.interceptors.request.use(
 
 export const loginAdmin = async ({ email, password }) => {
   try {
-    const res = await apiClient.post("auth/login", { email, password });
+    const res = await apiClient.post("auth/login", {
+      email,
+      password,
+    });
+
     const { success, data, message } = res.data;
 
-    if (!success) throw new Error(message || "Login failed");
+    if (!success) {
+      throw new Error(message || "Login failed");
+    }
 
     const { access_token, user, user_type } = data;
 
-    // ✅ Allow both admin and superadmin to access the dashboard
-    if (user_type !== "admin" && user_type !== "superadmin") {
-      throw new Error("Access denied: Insufficient privileges.");
+    if (!access_token) {
+      throw new Error("No access token received");
     }
 
-    // ✅ Store the critical data
+    // ✅ Only allow admin + superadmin dashboard access
+    if (user_type !== "admin" && user_type !== "superadmin") {
+      throw new Error(
+        "Access denied: You do not have administrator privileges."
+      );
+    }
+
+    // ✅ Save auth info
     localStorage.setItem("token", access_token);
     localStorage.setItem("user_type", user_type);
     localStorage.setItem("user", JSON.stringify(user));
 
-    // ✅ Update Axios headers immediately for current session
     const authHeader = `Bearer ${access_token}`;
-    apiClient.defaults.headers.common["Authorization"] = authHeader;
-    adminApi.defaults.headers.common["Authorization"] = authHeader;
 
-    return { user, token: access_token, user_type };
+    apiClient.defaults.headers.common.Authorization = authHeader;
+    adminApi.defaults.headers.common.Authorization = authHeader;
+
+    return {
+      user,
+      token: access_token,
+      user_type,
+    };
+
   } catch (err) {
-    const errorMsg = err.response?.data?.message || err.message;
+
+    const errorMsg =
+      err.response?.data?.message ||
+      err.message ||
+      "Invalid credentials";
+
     throw new Error(errorMsg);
   }
 };
-
 
 
 // ------------------- ADMIN ORDERS API FUNCTIONS -------------------
@@ -240,17 +261,19 @@ export const getDashboardStats = async () => {
 
 
 // Get all customers (for sidebar list)
-export const getCustomers = async () => {
-  const response = await adminApi.get("/admin/customers");
-  return response.data;
-};
+// REMOVE THIS - It causes the 404 error because the route doesn't exist
+// export const getCustomers = async () => { ... } 
 
-// Get single customer details
+// KEEP THIS - This matches your successful test
 export const getCustomerById = async (id) => {
-  const response = await adminApi.get(`/admin/customers/${id}`);
-  return response.data;
+  try {
+    const response = await adminApi.get(`/admin/customers/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching customer:", error.response?.data || error.message);
+    throw error;
+  }
 };
-
 
 
 // ------------------- ADMIN MANAGEMENT API -------------------
@@ -299,5 +322,31 @@ export const updateMenuItem = async (id, formData) => {
   const response = await adminApi.post(`/admin/menu-management/${id}`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
+  return response.data;
+};
+
+
+// src/api/apiServices.js
+
+export const getNotifications = async (page = 1) => {
+  const response = await adminApi.get(`/notifications?page=${page}`);
+  return response.data;
+};
+
+// Mark one as read
+export const markNotificationAsRead = async (id) => {
+  const response = await adminApi.get(`/notifications/${id}/read`);
+  return response.data;
+};
+
+// Mark all as read
+export const markAllNotificationsRead = async () => {
+  const response = await adminApi.post(`/notifications/mark-all-read`);
+  return response.data;
+};
+
+// Delete notification
+export const deleteNotification = async (id) => {
+  const response = await adminApi.delete(`/notifications/${id}`);
   return response.data;
 };

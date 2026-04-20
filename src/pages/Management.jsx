@@ -1985,16 +1985,380 @@
 
 
 
+// import React, { useState, useEffect } from "react";
+// import { FiSearch, FiEdit2 } from "react-icons/fi";
+// import { BsThreeDotsVertical } from "react-icons/bs";
+// import { 
+//   getMenuItems, 
+//   toggleMenuItemStatus, 
+//   addMenuItem, 
+//   updateMenuItem, 
+//   deleteMenuItem,
+//   apiClient // Used to fetch categories for the dropdown
+// } from "../api/apiServices";
+
+// const statusStyles = {
+//   Available: { bg: "bg-green-100", text: "text-green-700", border: "border-green-200", hover: "hover:bg-green-200" },
+//   Unavailable: { bg: "bg-red-100", text: "text-red-700", border: "border-red-200", hover: "hover:bg-red-200" },
+// };
+
+// export default function MenuManagement() {
+//   const [menuItems, setMenuItems] = useState([]);
+//   const [categories, setCategories] = useState([]); 
+//   const [loading, setLoading] = useState(true);
+//   const [searchTerm, setSearchTerm] = useState("");
+
+//   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+//   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+//   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+//   const [selectedItem, setSelectedItem] = useState(null);
+//   const [submitting, setSubmitting] = useState(false);
+
+//   const [formData, setFormData] = useState({
+//     name: "",
+//     category_id: "",
+//     price: "",
+//     description: "",
+//     imageFile: null,
+//     imagePreview: null,
+//   });
+
+//   // Fetch menu and category list on load
+//   const fetchInitialData = async () => {
+//     setLoading(true);
+//     try {
+//       const menuRes = await getMenuItems();
+//       if (menuRes.success) {
+//         const formatted = menuRes.data.map((item) => ({
+//           id: item.id,
+//           name: item.name,
+//           description: item.description,
+//           category: item.category,
+//           category_id: item.category_id,
+//           price: item.price,
+//           status: item.is_available ? "Available" : "Unavailable",
+//           image: item.image,
+//         }));
+//         setMenuItems(formatted);
+//       }
+
+//       // Fetch the categories so the admin can pick from a list
+//       const catRes = await apiClient.get("/web-menu");
+//       if (catRes.data.success) {
+//         setCategories(catRes.data.data.categories);
+//       }
+//     } catch (err) {
+//       console.error("Data fetch error:", err);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchInitialData();
+//   }, []);
+
+//   const handleToggleStatus = async (id) => {
+//     try {
+//       await toggleMenuItemStatus(id);
+//       fetchInitialData();
+//     } catch (err) {
+//       alert("Failed to update status");
+//     }
+//   };
+
+//   const openEditModal = (item) => {
+//     setSelectedItem(item);
+//     setFormData({
+//       name: item.name,
+//       category_id: item.category_id || "",
+//       price: String(item.price).replace(/,/g, ""),
+//       description: item.description || "",
+//       imageFile: null,
+//       imagePreview: item.image || null,
+//     });
+//     setIsEditModalOpen(true);
+//   };
+
+//   const handleInputChange = (e) => {
+//     const { name, value } = e.target;
+//     setFormData((prev) => ({ ...prev, [name]: value }));
+//   };
+
+//   const handleImageUpload = (e) => {
+//     const file = e.target.files?.[0];
+//     if (!file) return;
+//     setFormData((prev) => ({
+//       ...prev,
+//       imageFile: file,
+//       imagePreview: URL.createObjectURL(file),
+//     }));
+//   };
+
+//   const handleAddItem = async (e) => {
+//     e.preventDefault();
+//     setSubmitting(true);
+    
+//     const data = new FormData();
+//     data.append("name", formData.name);
+//     data.append("category_id", formData.category_id);
+//     data.append("price", formData.price);
+//     data.append("description", formData.description || "");
+//     if (formData.imageFile) data.append("image", formData.imageFile);
+
+//     // LOG THE DATA TO CHECK VALUES
+//     console.log("--- Sending Add Item Data ---");
+//     for (let pair of data.entries()) {
+//       console.log(pair[0] + ': ' + pair[1]);
+//     }
+
+//     try {
+//       await addMenuItem(data);
+//       alert("Item added successfully!");
+//       setIsAddModalOpen(false);
+//       resetForm();
+//       fetchInitialData();
+//     } catch (err) {
+//       console.error("Add Item Error:", err.response?.data);
+//       alert(err.response?.data?.message || "Failed to add item");
+//     } finally {
+//       setSubmitting(false);
+//     }
+//   };
+
+//   const handleUpdateItem = async (e) => {
+//     e.preventDefault();
+//     setSubmitting(true);
+    
+//     const data = new FormData();
+//     data.append("name", formData.name);
+//     data.append("category_id", formData.category_id);
+//     data.append("price", formData.price);
+//     data.append("description", formData.description || "");
+    
+//     // IMPORTANT: Laravel needs POST + _method PUT for file updates
+//     data.append("_method", "PUT");
+//     if (formData.imageFile) data.append("image", formData.imageFile);
+
+//     console.log("--- Sending Update Item Data ---");
+//     for (let pair of data.entries()) {
+//       console.log(pair[0] + ': ' + pair[1]);
+//     }
+
+//     try {
+//       await updateMenuItem(selectedItem.id, data);
+//       alert("Item updated successfully!");
+//       setIsEditModalOpen(false);
+//       resetForm();
+//       fetchInitialData();
+//     } catch (err) {
+//       console.error("Update Item Error:", err.response?.data);
+//       alert("Update failed. Check console for error details.");
+//     } finally {
+//       setSubmitting(false);
+//     }
+//   };
+
+//   const resetForm = () => {
+//     setFormData({ name: "", category_id: "", price: "", description: "", imageFile: null, imagePreview: null });
+//     setSelectedItem(null);
+//   };
+
+//   const filteredItems = menuItems.filter((item) =>
+//     [item.name, item.description, item.category].some((field) =>
+//       field?.toLowerCase().includes(searchTerm.toLowerCase())
+//     )
+//   );
+
+//   return (
+//     <div className="min-h-screen bg-[#f4efe6] p-6 md:p-8 font-sans">
+//       <div className="max-w-7xl mx-auto space-y-6">
+//         {/* Header */}
+//         <div className="flex mt-10 flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+//           <div>
+//             <h1 className="text-3xl md:text-[32px] font-bold text-gray-900 font-roboto">Menu Management</h1>
+//             <p className="mt-1 text-sm text-gray-600">Add, edit, and manage menu items and their availability.</p>
+//           </div>
+//           <button
+//             onClick={() => { resetForm(); setIsAddModalOpen(true); }}
+//             className="bg-[#D4AF37] hover:bg-[#c09b2f] text-white px-5 py-2.5 rounded-xl md:rounded-[14px] text-sm md:text-[13px] font-medium shadow-sm transition-colors flex items-center gap-1.5"
+//           >
+//             + Add Items
+//           </button>
+//         </div>
+
+//         {/* Search */}
+//         <div className="relative max-w-md">
+//           <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-lg" />
+//           <input
+//             type="text"
+//             placeholder="Search menu items..."
+//             value={searchTerm}
+//             onChange={(e) => setSearchTerm(e.target.value)}
+//             className="pl-10 pr-4 py-2 w-full bg-white border shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px] font-dm"
+//           />
+//         </div>
+
+//         {/* Table */}
+//         <div className="bg-white rounded-2xl md:rounded-[24px] shadow-sm border border-gray-100 overflow-hidden">
+//           <div className="overflow-x-auto">
+//             <table className="w-full text-left min-w-[700px]">
+//               <thead className="bg-[#F6E9EA] text-gray-600 text-sm uppercase tracking-wider">
+//                 <tr>
+//                   <th className="px-6 py-4 font-roboto font-semibold">ITEM</th>
+//                   <th className="px-6 py-4 font-roboto font-semibold">CATEGORY</th>
+//                   <th className="px-6 py-4 font-roboto font-semibold">PRICE</th>
+//                   <th className="px-6 py-4 font-roboto font-semibold">STATUS</th>
+//                   <th className="px-6 py-4 font-roboto font-semibold text-right">ACTIONS</th>
+//                 </tr>
+//               </thead>
+//               <tbody className="divide-y divide-gray-100">
+//                 {loading ? (
+//                   <tr><td colSpan="5" className="py-16 text-center">Loading menu items...</td></tr>
+//                 ) : (
+//                   filteredItems.map((item) => (
+//                     <tr key={item.id} className="hover:bg-gray-50/60 transition-colors">
+//                       <td className="px-6 py-4">
+//                         <div className="flex items-center gap-3">
+//                           <div className="w-10 h-10 rounded-[15.19px] bg-gray-50 border border-gray-200 overflow-hidden flex items-center justify-center text-xl">
+//                             {item.image ? (
+//                               <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+//                             ) : "🍽️"}
+//                           </div>
+//                           <div>
+//                             <div className="font-medium text-gray-900">{item.name}</div>
+//                             <div className="text-sm text-gray-500 line-clamp-1">{item.description}</div>
+//                           </div>
+//                         </div>
+//                       </td>
+//                       <td className="px-6 py-4 text-gray-700">{item.category}</td>
+//                       <td className="px-6 py-4 font-medium text-gray-900">₦{item.price}</td>
+//                       <td className="px-6 py-4">
+//                         <button
+//                           onClick={() => handleToggleStatus(item.id)}
+//                           className={`px-3.5 py-1.5 text-sm font-medium rounded-full border flex items-center gap-1.5 transition-all ${statusStyles[item.status].bg} ${statusStyles[item.status].text} ${statusStyles[item.status].border} ${statusStyles[item.status].hover}`}
+//                         >
+//                           {item.status} <span className="text-xs opacity-70">▼</span>
+//                         </button>
+//                       </td>
+//                       <td className="px-6 py-4 text-right">
+//                         <div className="flex items-center justify-end gap-3">
+//                           <button onClick={() => openEditModal(item)} className="p-1.5 text-gray-500 hover:text-[#D4AF37] rounded hover:bg-gray-100">
+//                             <FiEdit2 size={18} />
+//                           </button>
+//                           <button onClick={() => { setSelectedItem(item); setIsDeleteModalOpen(true); }} className="p-1.5 text-gray-500 hover:text-red-600 rounded hover:bg-gray-100">
+//                             <BsThreeDotsVertical size={18} />
+//                           </button>
+//                         </div>
+//                       </td>
+//                     </tr>
+//                   ))
+//                 )}
+//               </tbody>
+//             </table>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* ADD & EDIT MODAL */}
+//       {(isAddModalOpen || isEditModalOpen) && (
+//         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+//           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+//             <div className="px-6 py-4 border-b">
+//               <h2 className="text-xl font-bold text-center text-[#A61E30]">
+//                 {isEditModalOpen ? "Edit Menu Item" : "Add New Menu Item"}
+//               </h2>
+//             </div>
+
+//             <form onSubmit={isEditModalOpen ? handleUpdateItem : handleAddItem} className="p-6 space-y-5">
+//               <input
+//                 type="text"
+//                 name="name"
+//                 value={formData.name}
+//                 onChange={handleInputChange}
+//                 placeholder="Item Name"
+//                 required
+//                 className="pl-3 pr-4 py-2 w-full bg-white border shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px] font-dm"
+//               />
+
+//               {/* DROPDOWN FOR CATEGORIES */}
+//               <select
+//                 name="category_id"
+//                 value={formData.category_id}
+//                 onChange={handleInputChange}
+//                 required
+//                 className="pl-3 pr-4 py-2 w-full bg-white border shadow-sm text-gray-500 outline-none rounded-[28px] rounded-tl-[5px] font-dm"
+//               >
+//                 <option value="">Select Category</option>
+//                 {categories.map((cat) => (
+//                   <option key={cat.id} value={cat.id}>
+//                     {cat.name}
+//                   </option>
+//                 ))}
+//               </select>
+
+//               <input
+//                 type="number"
+//                 name="price"
+//                 value={formData.price}
+//                 onChange={handleInputChange}
+//                 placeholder="Price (e.g. 2500)"
+//                 required
+//                 className="pl-3 pr-4 py-2 w-full bg-white border shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px] font-dm"
+//               />
+
+//               <textarea
+//                 name="description"
+//                 value={formData.description}
+//                 onChange={handleInputChange}
+//                 placeholder="Description..."
+//                 rows={3}
+//                 className="pl-4 pr-4 py-3 w-full bg-white border border-gray-300 shadow-sm text-gray-700 outline-none rounded-[28px] rounded-tl-[8px] font-dm resize-none"
+//               />
+
+//               <div className="relative group mt-2">
+//                 <div className="w-full h-32 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 overflow-hidden">
+//                   {formData.imagePreview ? (
+//                     <img src={formData.imagePreview} alt="preview" className="w-full h-full object-cover" />
+//                   ) : (
+//                     <div className="flex flex-col items-center justify-center h-full text-gray-400 text-xs">
+//                       Tap to upload image
+//                     </div>
+//                   )}
+//                 </div>
+//                 <label className="absolute inset-0 cursor-pointer">
+//                   <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+//                 </label>
+//               </div>
+
+//               <div className="flex justify-end gap-3 pt-4">
+//                 <button type="button" onClick={() => { setIsAddModalOpen(false); setIsEditModalOpen(false); resetForm(); }} className="px-6 py-2.5 text-gray-700 bg-gray-200 rounded-[11.2px]">Cancel</button>
+//                 <button type="submit" disabled={submitting} className="px-6 py-2.5 bg-[#A61E30] text-white rounded-[11.2px]">{submitting ? "Saving..." : "Save Item"}</button>
+//               </div>
+//             </form>
+//           </div>
+//         </div>
+//       )}
+//     </div>
+//   );
+// }
+
+
+
+
+
+
 import React, { useState, useEffect } from "react";
 import { FiSearch, FiEdit2 } from "react-icons/fi";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import toast from "react-hot-toast";
 import { 
   getMenuItems, 
   toggleMenuItemStatus, 
   addMenuItem, 
   updateMenuItem, 
   deleteMenuItem,
-  apiClient // Used to fetch categories for the dropdown
+  apiClient 
 } from "../api/apiServices";
 
 const statusStyles = {
@@ -2023,7 +2387,6 @@ export default function MenuManagement() {
     imagePreview: null,
   });
 
-  // Fetch menu and category list on load
   const fetchInitialData = async () => {
     setLoading(true);
     try {
@@ -2042,13 +2405,13 @@ export default function MenuManagement() {
         setMenuItems(formatted);
       }
 
-      // Fetch the categories so the admin can pick from a list
       const catRes = await apiClient.get("/web-menu");
       if (catRes.data.success) {
         setCategories(catRes.data.data.categories);
       }
     } catch (err) {
       console.error("Data fetch error:", err);
+      toast.error("Failed to refresh menu items");
     } finally {
       setLoading(false);
     }
@@ -2061,9 +2424,73 @@ export default function MenuManagement() {
   const handleToggleStatus = async (id) => {
     try {
       await toggleMenuItemStatus(id);
+      toast.success("Status updated successfully");
       fetchInitialData();
     } catch (err) {
-      alert("Failed to update status");
+      toast.error("Failed to update status");
+    }
+  };
+
+  const handleAddItem = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    
+    const data = new FormData();
+    data.append("name", formData.name);
+    data.append("category_id", formData.category_id);
+    data.append("price", formData.price);
+    data.append("description", formData.description || "");
+    if (formData.imageFile) data.append("image", formData.imageFile);
+
+    try {
+      await addMenuItem(data);
+      toast.success(`${formData.name} added to menu!`);
+      setIsAddModalOpen(false);
+      resetForm();
+      fetchInitialData();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to add item");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleUpdateItem = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    
+    const data = new FormData();
+    data.append("name", formData.name);
+    data.append("category_id", formData.category_id);
+    data.append("price", formData.price);
+    data.append("description", formData.description || "");
+    data.append("_method", "PUT");
+    if (formData.imageFile) data.append("image", formData.imageFile);
+
+    try {
+      await updateMenuItem(selectedItem.id, data);
+      toast.success("Item updated successfully!");
+      setIsEditModalOpen(false);
+      resetForm();
+      fetchInitialData();
+    } catch (err) {
+      toast.error("Update failed. Please check your inputs.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteItem = async () => {
+    try {
+      setSubmitting(true);
+      await deleteMenuItem(selectedItem.id);
+      toast.success("Item removed from menu");
+      setIsDeleteModalOpen(false);
+      fetchInitialData();
+    } catch (err) {
+      toast.error("Failed to delete item");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -2093,70 +2520,6 @@ export default function MenuManagement() {
       imageFile: file,
       imagePreview: URL.createObjectURL(file),
     }));
-  };
-
-  const handleAddItem = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
-    
-    const data = new FormData();
-    data.append("name", formData.name);
-    data.append("category_id", formData.category_id);
-    data.append("price", formData.price);
-    data.append("description", formData.description || "");
-    if (formData.imageFile) data.append("image", formData.imageFile);
-
-    // LOG THE DATA TO CHECK VALUES
-    console.log("--- Sending Add Item Data ---");
-    for (let pair of data.entries()) {
-      console.log(pair[0] + ': ' + pair[1]);
-    }
-
-    try {
-      await addMenuItem(data);
-      alert("Item added successfully!");
-      setIsAddModalOpen(false);
-      resetForm();
-      fetchInitialData();
-    } catch (err) {
-      console.error("Add Item Error:", err.response?.data);
-      alert(err.response?.data?.message || "Failed to add item");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleUpdateItem = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
-    
-    const data = new FormData();
-    data.append("name", formData.name);
-    data.append("category_id", formData.category_id);
-    data.append("price", formData.price);
-    data.append("description", formData.description || "");
-    
-    // IMPORTANT: Laravel needs POST + _method PUT for file updates
-    data.append("_method", "PUT");
-    if (formData.imageFile) data.append("image", formData.imageFile);
-
-    console.log("--- Sending Update Item Data ---");
-    for (let pair of data.entries()) {
-      console.log(pair[0] + ': ' + pair[1]);
-    }
-
-    try {
-      await updateMenuItem(selectedItem.id, data);
-      alert("Item updated successfully!");
-      setIsEditModalOpen(false);
-      resetForm();
-      fetchInitialData();
-    } catch (err) {
-      console.error("Update Item Error:", err.response?.data);
-      alert("Update failed. Check console for error details.");
-    } finally {
-      setSubmitting(false);
-    }
   };
 
   const resetForm = () => {
@@ -2260,7 +2623,7 @@ export default function MenuManagement() {
         </div>
       </div>
 
-      {/* ADD & EDIT MODAL */}
+      {/* ADD & EDIT MODAL (ORIGINAL UI) */}
       {(isAddModalOpen || isEditModalOpen) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
@@ -2281,7 +2644,6 @@ export default function MenuManagement() {
                 className="pl-3 pr-4 py-2 w-full bg-white border shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px] font-dm"
               />
 
-              {/* DROPDOWN FOR CATEGORIES */}
               <select
                 name="category_id"
                 value={formData.category_id}
@@ -2291,9 +2653,7 @@ export default function MenuManagement() {
               >
                 <option value="">Select Category</option>
                 {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
               </select>
 
@@ -2336,6 +2696,22 @@ export default function MenuManagement() {
                 <button type="submit" disabled={submitting} className="px-6 py-2.5 bg-[#A61E30] text-white rounded-[11.2px]">{submitting ? "Saving..." : "Save Item"}</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE MODAL (ORIGINAL UI LOGIC) */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Delete Item?</h3>
+            <p className="text-gray-600 text-sm mb-6">Are you sure you want to remove <span className="font-bold text-red-600">{selectedItem?.name}</span>? This action cannot be undone.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setIsDeleteModalOpen(false)} className="flex-1 py-2.5 bg-gray-100 rounded-xl font-medium text-gray-700">Cancel</button>
+              <button onClick={handleDeleteItem} disabled={submitting} className="flex-1 py-2.5 bg-red-600 text-white rounded-xl font-medium">
+                {submitting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
           </div>
         </div>
       )}

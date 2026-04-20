@@ -14,11 +14,12 @@ import Management from "./pages/Management";
 import OrderDetailInfo from "./detailinfo/OrderDetailInfo";
 import CustomerslInfo from "./detailinfo/CustomersInfo";
 import Settings from "./pages/Settings";
-import Notifications from "./pages/Settings";
+
 import AnalyticsPage from "./pages/AnalyticDashboard";
 import CustomerPage from "./pages/CustomerPage";
 import AdminPermission from "./pages/AdminPermission";
 import ForgetPassword from "./component/Auth/Forget";
+import NotificationsPage from "./pages/Notifications";
 
 export default function App() {
   return (
@@ -44,7 +45,7 @@ export default function App() {
         <Route path="analytics" element={<AnalyticsPage />} />
         <Route path="order/:id" element={<OrderDetailInfo />} />
         <Route path="customers/:id" element={<CustomerslInfo />} />
-        <Route path="notifications" element={<Notifications />} />
+        <Route path="notifications" element={<NotificationsPage />} />
         <Route path="settings" element={<Settings />} />
         <Route path="admin" element={<AdminPermission />} />
       </Route>
