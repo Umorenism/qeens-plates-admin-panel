@@ -11,6 +11,11 @@ export const apiClient = axios.create({
 });
 
 
+// export const apiClient = axios.create({
+//   baseURL: base_url,
+// });
+
+
 
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("token"); // ✅ SAME AS ADMIN
@@ -27,21 +32,7 @@ export const adminApi = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-// Attach admin token automatically
-// apiServices.js
-// adminApi.interceptors.request.use(
-//   (config) => {
-//     const token = localStorage.getItem("token");          // ← change to "token"
-//     if (token) {
-//       config.headers.Authorization = `Bearer ${token}`;
-//       console.log("[Admin Request] Adding token:", token.substring(0, 20) + "...");
-//     } else {
-//       console.warn("[Admin Request] No token found in localStorage");
-//     }
-//     return config;
-//   },
-//   (error) => Promise.reject(error)
-// );
+
 
 adminApi.interceptors.request.use(
   (config) => {
@@ -56,66 +47,7 @@ adminApi.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ------------------- AUTH 
-// export const loginAdmin = async ({ email, password }) => {
-//   console.log("🔑 Attempting admin login for:", email);
 
-//   try {
-//     const res = await apiClient.post("auth/login", { email, password });
-//     const responseData = res.data;
-
-//     if (responseData.success === false) {
-//       throw new Error(responseData.message || "Login failed");
-//     }
-
-//     const data = responseData.data || {};
-//     // Extract user_type along with token and user
-//     const { access_token, token_type = "Bearer", user, user_type } = data;
-
-//     if (!access_token) {
-//       throw new Error("No access token received");
-//     }
-
-   
-//     if (user_type !== "admin") {
-//       throw new Error("Access denied: You do not have administrator privileges.");
-//     }
-
-//     const token = access_token;
-
-//     // Store data in localStorage
-//     localStorage.setItem("token", token);
-//     localStorage.setItem("user_type", user_type);
-//     localStorage.setItem("user", JSON.stringify(user || {}));
-
-//     // Set Authorization headers for both clients
-//     const authHeader = `${token_type} ${token}`;
-//     apiClient.defaults.headers.common["Authorization"] = authHeader;
-//     adminApi.defaults.headers.common["Authorization"] = authHeader;
-
-//     console.log("✅ Admin Login successful");
-//     return { user, token, token_type, user_type };
-
-//   } catch (err) {
-//     console.error("❌ Login error details:", {
-//       status: err.response?.status,
-//       data: err.response?.data,
-//       message: err.message
-//     });
-
-   
-//     let errorMsg = err.message || "Invalid credentials or server error";
-
-//     if (err.response?.data) {
-//       const data = err.response.data;
-//       errorMsg = data.message || 
-//                  (data.errors && Object.values(data.errors).flat()[0]) ||
-//                  errorMsg;
-//     }
-
-//     throw new Error(errorMsg);
-//   }
-// };
 
 
 export const loginAdmin = async ({ email, password }) => {
@@ -230,23 +162,6 @@ export const toggleMenuItemStatus = async (id) => {
 
 
 
-// Add these to your apiServices.js
-
-// // Add new menu item
-// export const addMenuItem = async (formData) => {
-//   const response = await adminApi.post("/admin/menu-management", formData, {
-//     headers: { "Content-Type": "multipart/form-data" },
-//   });
-//   return response.data;
-// };
-
-// // Update menu item (using PUT as shown in your earlier test)
-// export const updateMenuItem = async (id, formData) => {
-//   const response = await adminApi.put(`/admin/menu-management/${id}`, formData, {
-//     headers: { "Content-Type": "multipart/form-data" },
-//   });
-//   return response.data;
-// };
 
 // Delete menu item
 export const deleteMenuItem = async (id) => {
@@ -260,11 +175,7 @@ export const getDashboardStats = async () => {
 };
 
 
-// Get all customers (for sidebar list)
-// REMOVE THIS - It causes the 404 error because the route doesn't exist
-// export const getCustomers = async () => { ... } 
 
-// KEEP THIS - This matches your successful test
 export const getCustomerById = async (id) => {
   try {
     const response = await adminApi.get(`/admin/customers/${id}`);
@@ -315,15 +226,7 @@ export const addMenuItem = async (formData) => {
   return response.data;
 };
 
-// Update menu item
-export const updateMenuItem = async (id, formData) => {
-  // We use POST here because of the image upload issue with PUT in many frameworks
-  // The component appends data.append("_method", "PUT") to satisfy the server's PUT requirement
-  const response = await adminApi.post(`/admin/menu-management/${id}`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-  return response.data;
-};
+
 
 
 // src/api/apiServices.js
@@ -348,5 +251,19 @@ export const markAllNotificationsRead = async () => {
 // Delete notification
 export const deleteNotification = async (id) => {
   const response = await adminApi.delete(`/notifications/${id}`);
+  return response.data;
+};
+
+export const updateMenuItem = async (id, formData) => {
+  const response = await adminApi.put(
+    `/admin/menu-management/${id}`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json",
+      },
+    }
+  );
   return response.data;
 };
