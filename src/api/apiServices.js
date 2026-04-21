@@ -180,6 +180,7 @@ export const getCustomerById = async (id) => {
   try {
     const response = await adminApi.get(`/admin/customers/${id}`);
     return response.data;
+    console.log("Customer data:", response);
   } catch (error) {
     console.error("Error fetching customer:", error.response?.data || error.message);
     throw error;

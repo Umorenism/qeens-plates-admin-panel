@@ -2056,7 +2056,7 @@ export default function CustomerPage() {
               <FiSlash />
             </button>
             <button 
-              onClick={() => navigate("/messages")} 
+              onClick={() => navigate("/dashboard/notifications")} 
               className="bg-[#A61E30] text-white rounded-[12px] h-[44px] px-6 text-sm font-medium hover:bg-[#8f1624] transition-all flex items-center gap-2 shadow-md shadow-red-900/10"
             >
               <FiMessageSquare /> Send Message
