@@ -183,7 +183,7 @@ export default function OrderDetailInfo() {
     "Delivered",
   ];
 
-  const [currentStatus, setCurrentStatus] = useState(statuses[0]);
+  const [currentStatus, setCurrentStatus] = useState("");
 
   useEffect(() => {
     const fetchOrderDetail = async () => {
@@ -191,12 +191,12 @@ export default function OrderDetailInfo() {
         setLoading(true);
         const response = await getOrderById(id);
         if (response.success) {
+          // Setting the data from res.data
           setOrder(response.data);
-          // Map backend status to your local UI status if needed
-          setCurrentStatus(response.data.status || statuses[0]);
+          setCurrentStatus(response.data.status || "Order Received");
         }
       } catch (err) {
-        console.error("Error:", err);
+        console.error("Error fetching order:", err);
         toast.error("Failed to load order details");
       } finally {
         setLoading(false);
@@ -209,7 +209,7 @@ export default function OrderDetailInfo() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#f4efe6] flex items-center justify-center font-dm">
-        <p className="text-gray-500">Loading order details...</p>
+        <div className="animate-pulse text-gray-500 text-lg font-medium">Loading order details...</div>
       </div>
     );
   }
@@ -230,20 +230,19 @@ export default function OrderDetailInfo() {
         <div className="flex justify-between items-center mt-10 flex-wrap gap-3">
           <div className="flex flex-col items-start gap-2">
             <h1 className="text-[22px] font-Roboto text-[#3A3A3A] font-bold">
-              {order.order_id}
+              {order.order_number}
             </h1>
             <span className="text-sm text-gray-500">
-              {order.date}
+              {order.created_at}
             </span>
           </div>
 
-          {/* Dynamic Status Display */}
           <div className="bg-orange-100 text-orange-700 px-4 py-1.5 rounded-full text-sm font-medium">
             {currentStatus}
           </div>
         </div>
 
-        {/* Customer + Payment */}
+        {/* Info Grid */}
         <div className="grid md:grid-cols-2 gap-6">
           
           {/* Customer Card */}
@@ -259,18 +258,16 @@ export default function OrderDetailInfo() {
               </p>
               <p>
                 <span className="text-gray-500">Phone:</span>{" "}
-                <span className="font-medium font-dm text-[#000000]">{order.customer?.phone || "N/A"}</span>
+                <span className="font-medium font-dm text-[#000000]">{order.customer?.phone}</span>
               </p>
               <p>
                 <span className="text-gray-500">Address:</span>{" "}
-                <span className="font-medium font-dm text-[#000000]">
-                  {order.customer?.address || "No address provided"}
-                </span>
+                <span className="font-medium font-dm text-[#000000]">{order.customer?.address}</span>
               </p>
             </div>
           </div>
 
-          {/* Payment Card */}
+          {/* Payment Card - Updated for your new Response */}
           <div className="bg-white rounded-2xl p-6 shadow-sm border">
             <h2 className="text-[20.5px] font-dm font-semibold text-[#A61E30] mb-4">
               Payment
@@ -279,88 +276,73 @@ export default function OrderDetailInfo() {
             <div className="space-y-2 text-sm">
               <p>
                 <span className="text-gray-500 font-dm text-[#3A3A3AB2]">Method:</span>{" "}
-                <span className="font-dm text-black">{order.payment_method || "Card Payment"}</span>
+                <span className="font-dm text-black">{order.payment?.method}</span>
               </p>
               <p>
                 <span className="text-gray-500 font-dm text-[#3A3A3AB2]">Status:</span>{" "}
-                <span className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                  order.status === 'Paid' ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
-                }`}>
-                  {order.status}
+                <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold ml-2">
+                  {order.payment?.status}
                 </span>
               </p>
               <p className="pt-2">
                 <span className="text-gray-500 font-dm text-[#3A3A3AB2]">Total:</span>{" "}
-                <span className="text-xl text-black font-bold font-dm">₦{order.total}</span>
+                <span className="text-xl text-black font-bold font-dm">₦{order.payment?.total}</span>
               </p>
             </div>
           </div>
         </div>
 
-        {/* Ordered Items Table */}
+        {/* Ordered Items */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border">
           <h2 className="text-[20px] font-dm text-[#A61E30] font-bold mb-5">
             ORDERED ITEMS
           </h2>
 
-          <div className="overflow-hidden">
-            <table className="w-full rounded-[30px] text-sm">
-              <thead className="bg-[#F6E9EA] text-gray-600 rounded-[30px]">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-[#F6E9EA] text-gray-600">
                 <tr>
-                  <th className="text-left px-4 py-3">Item</th>
+                  <th className="text-left px-4 py-3 rounded-l-lg">Item</th>
                   <th className="text-center px-4 py-3">Qty</th>
                   <th className="text-right px-4 py-3">Price</th>
-                  <th className="text-right px-4 py-3">Subtotal</th>
+                  <th className="text-right px-4 py-3 rounded-r-lg">Subtotal</th>
                 </tr>
               </thead>
 
-              <tbody>
+              <tbody className="divide-y divide-gray-50">
                 {order.items?.map((item, index) => (
-                  <tr key={index} className="text-black border-b last:border-0">
-                    <td className="px-4 py-3">{item.name}</td>
-                    <td className="text-center">{item.quantity}</td>
-                    <td className="text-right">₦{item.price}</td>
-                    <td className="text-right font-medium">₦{item.subtotal}</td>
+                  <tr key={index} className="text-black">
+                    <td className="px-4 py-4">{item.name}</td>
+                    <td className="text-center px-4 py-4">{item.quantity}</td>
+                    <td className="text-right px-4 py-4">₦{item.price}</td>
+                    <td className="text-right px-4 py-4 font-medium">₦{item.subtotal}</td>
                   </tr>
                 ))}
-                {(!order.items || order.items.length === 0) && (
-                   <tr className="text-black">
-                     <td colSpan="4" className="px-4 py-3 text-center text-gray-400">No items in this order</td>
-                   </tr>
-                )}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* Update Status Actions */}
+        {/* Status Actions */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border">
           <h2 className="text-[20px] font-dm font-bold text-[#A61E30] mb-5">
             UPDATE STATUS
           </h2>
 
           <div className="flex flex-wrap gap-3">
-            {statuses.map((status) => {
-              const active = currentStatus === status;
-
-              return (
-                <button
-                  key={status}
-                  onClick={() => setCurrentStatus(status)}
-                  className={`
-                    px-4 py-2 text-sm transition font-dm
-                    rounded-[40px] rounded-tl-[5px]
-                    ${
-                      active
-                        ? "bg-[#A61E30] text-white"
-                        : "bg-[#F3E9B530] border text-gray-700 hover:bg-gray-200"
-                    }
-                  `}
-                >
-                  {status}
-                </button>
-              );
-            })}
+            {statuses.map((status) => (
+              <button
+                key={status}
+                onClick={() => setCurrentStatus(status)}
+                className={`px-4 py-2 text-sm transition font-dm rounded-[40px] rounded-tl-[5px] ${
+                  currentStatus === status
+                    ? "bg-[#A61E30] text-white"
+                    : "bg-[#F3E9B530] border text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                {status}
+              </button>
+            ))}
           </div>
         </div>
 
