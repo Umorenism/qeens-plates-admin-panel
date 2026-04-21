@@ -3221,16 +3221,20 @@ export default function MenuManagement() {
     imagePreview: null, 
   });
 
-  // HELPER: Fixes the "Joint URL" issue by detecting absolute paths
   const formatImageUrl = (url) => {
-    if (!url) return null;
-    // If the URL is already a full web link (Cloudinary), return it as is
-    if (url.startsWith("http://") || url.startsWith("https://")) {
-      return url;
-    }
-    // Otherwise, assume it's a local storage path (adjust base URL as needed)
-    return `https://queensplate-main-jw6so1.free.laravel.cloud/storage/${url}`;
-  };
+  if (!url) return null;
+
+  // If it's a Cloudinary link (even if it's nested inside a local storage path string)
+  if (url.includes("res.cloudinary.com")) {
+    // Extract only the cloudinary part if the backend prepended the local storage URL
+    const cloudinaryMatch = url.match(/https:\/\/res\.cloudinary\.com\/.*$/);
+    return cloudinaryMatch ? cloudinaryMatch[0] : url;
+  }
+
+  if (url.startsWith("http")) return url;
+
+  return `https://queensplate-main-jw6so1.free.laravel.cloud/storage/${url}`;
+};
 
   const closeModals = () => {
     if (formData.imagePreview && formData.imagePreview.startsWith("blob:")) {
@@ -3287,56 +3291,70 @@ export default function MenuManagement() {
   };
 
   const handleAddItem = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
+  e.preventDefault();
+  setSubmitting(true);
+  
+  const data = new FormData();
+  data.append("name", formData.name);
+  data.append("category_id", formData.category_id);
+  data.append("price", formData.price);
+  data.append("description", formData.description || "");
+  
+  if (formData.image) {
+    data.append("image", formData.image);
+  }
+
+  try {
+    // Ensure headers tell the server to expect a file
+    await apiClient.post("/admin/menu-management", data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     
-    const data = new FormData();
-    data.append("name", formData.name);
-    data.append("category_id", formData.category_id);
-    data.append("price", formData.price);
-    data.append("description", formData.description || "");
-    if (formData.image) data.append("image", formData.image);
+    toast.success(`${formData.name} added to menu!`);
+    closeModals();
+    fetchInitialData();
+  } catch (err) {
+    toast.error(err.response?.data?.message || "Failed to add item");
+  } finally {
+    setSubmitting(false);
+  }
+};
 
-    try {
-      await addMenuItem(data);
-      toast.success(`${formData.name} added to menu!`);
-      closeModals();
-      fetchInitialData();
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to add item");
-    } finally {
-      setSubmitting(false);
-    }
-  };
+ const handleUpdateItem = async (e) => {
+  e.preventDefault();
+  setSubmitting(true);
 
-  const handleUpdateItem = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
+  const data = new FormData();
+  data.append("name", formData.name);
+  data.append("category_id", formData.category_id);
+  data.append("price", formData.price);
+  data.append("description", formData.description || "");
+  data.append("_method", "PUT"); // Method Spoofing
 
-    const data = new FormData();
-    data.append("name", formData.name);
-    data.append("category_id", formData.category_id);
-    data.append("price", formData.price);
-    data.append("description", formData.description || "");
-    
-    // Method Spoofing for Laravel file uploads on PUT
-    data.append("_method", "PUT");
+  if (formData.image) {
+    data.append("image", formData.image);
+  }
 
-    if (formData.image) {
-      data.append("image", formData.image);
-    }
+  try {
+    // NOTE: Use .post instead of .put because we are sending FormData
+    // The _method append tells Laravel to treat it as a PUT
+    await apiClient.post(`/admin/menu-management/${selectedItem.id}`, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
 
-    try {
-      await updateMenuItem(selectedItem.id, data);
-      toast.success("Item updated successfully!");
-      closeModals();
-      fetchInitialData();
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Update failed.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
+    toast.success("Item updated successfully!");
+    closeModals();
+    fetchInitialData();
+  } catch (err) {
+    toast.error(err.response?.data?.message || "Update failed.");
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   const handleDeleteItem = async () => {
     try {
