@@ -1948,29 +1948,49 @@ export default function CustomerPage() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const fetchSidebarFromOrders = async () => {
-    setLoading(true);
-    try {
-      const response = await getAllOrders();
-      if (response.success && response.data?.orders) {
-        // Using a Map to ensure unique customers from order history
-        const uniqueMap = new Map();
-        response.data.orders.forEach(o => {
-          if(!uniqueMap.has(o.customer?.id)) {
-            uniqueMap.set(o.customer?.id, {
-              id: o.customer?.id || o.id,
-              name: o.customer?.name || "Unknown Customer",
-              order_id: o.order_id,
-              avatar: o.customer?.avatar || null,
-              status: "Active"
-            });
-          }
-        });
-        const formatted = Array.from(uniqueMap.values());
-        setCustomers(formatted);
-        if (formatted.length > 0 && !selectedCustomerId) setSelectedCustomerId(formatted[0].id);
+  setLoading(true);
+  try {
+    const response = await getAllOrders();
+    if (response.success && response.data?.orders) {
+      const uniqueMap = new Map();
+
+      response.data.orders.forEach((o) => {
+        // 1. Create a reliable unique key. 
+        // Use Customer ID if available, otherwise fallback to a unique string 
+        // combined with name to prevent "New Accounts" from overwriting each other.
+        const customerId = o.customer?.id;
+        const customerName = o.customer?.name || "Unknown Customer";
+        
+        // We use the ID as the primary key, but if it's missing, 
+        // we use the Order ID to ensure it shows up as a distinct entry.
+        const mapKey = customerId || `temp-id-${o.id}`;
+
+        if (!uniqueMap.has(mapKey)) {
+          uniqueMap.set(mapKey, {
+            id: mapKey, // This is what selectedCustomerId will use
+            actualId: customerId, // Store the real ID for the API call
+            name: customerName,
+            order_id: o.order_id,
+            avatar: o.customer?.avatar || null,
+            status: "Active"
+          });
+        }
+      });
+
+      const formatted = Array.from(uniqueMap.values());
+      setCustomers(formatted);
+
+      // Auto-select the first one if nothing is selected
+      if (formatted.length > 0 && !selectedCustomerId) {
+        setSelectedCustomerId(formatted[0].id);
       }
-    } catch (err) { console.error(err); } finally { setLoading(false); }
-  };
+    }
+  } catch (err) {
+    console.error("Sidebar Sync Error:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const fetchCustomerDetails = async (id) => {
     if (!id) return;
