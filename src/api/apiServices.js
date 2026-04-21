@@ -1,53 +1,81 @@
 
-// apiServices.js
+// // apiServices.js
+// import axios from "axios";
+
+// const base_url = "https://queensplate-main-jw6so1.free.laravel.cloud/api/v1/";
+
+// // ------------------- GENERAL USER API -------------------
+// export const apiClient = axios.create({
+//   baseURL: base_url,
+//   headers: { "Content-Type": "application/json" },
+// });
+
+
+// // export const apiClient = axios.create({
+// //   baseURL: base_url,
+// // });
+
+
+
+// apiClient.interceptors.request.use((config) => {
+//   const token = localStorage.getItem("token"); // ✅ SAME AS ADMIN
+//   if (token) {
+//     config.headers.Authorization = `Bearer ${token}`;
+//   }
+//   return config;
+// });
+
+
+// // ------------------- ADMIN API -------------------
+// export const adminApi = axios.create({
+//   baseURL: base_url,
+//   headers: { "Content-Type": "application/json" },
+// });
+
+
+
+// adminApi.interceptors.request.use(
+//   (config) => {
+//     const token = localStorage.getItem("token");
+//     if (token) {
+//       config.headers.Authorization = `Bearer ${token}`;
+//       config.headers.Accept = "application/json"; // Add this line
+//       console.log("[Admin Request] Adding token:", token.substring(0, 20) + "...");
+//     }
+//     return config;
+//   },
+//   (error) => Promise.reject(error)
+// );
+
+
+
+
 import axios from "axios";
 
 const base_url = "https://queensplate-main-jw6so1.free.laravel.cloud/api/v1/";
 
-// ------------------- GENERAL USER API -------------------
+// ------------------- CONFIG -------------------
 export const apiClient = axios.create({
   baseURL: base_url,
   headers: { "Content-Type": "application/json" },
 });
 
-
-// export const apiClient = axios.create({
-//   baseURL: base_url,
-// });
-
-
-
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token"); // ✅ SAME AS ADMIN
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-
-// ------------------- ADMIN API -------------------
 export const adminApi = axios.create({
   baseURL: base_url,
   headers: { "Content-Type": "application/json" },
 });
 
+const authInterceptor = (config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+    config.headers.Accept = "application/json";
+  }
+  return config;
+};
 
-
-adminApi.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-      config.headers.Accept = "application/json"; // Add this line
-      console.log("[Admin Request] Adding token:", token.substring(0, 20) + "...");
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-
+apiClient.interceptors.request.use(authInterceptor);
+adminApi.interceptors.request.use(authInterceptor);
 
 
 export const loginAdmin = async ({ email, password }) => {
