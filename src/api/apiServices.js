@@ -5,7 +5,7 @@
 
 import axios from "axios";
 
-const base_url = "https://queensplate-main-jw6so1.free.laravel.cloud/api/v1/";
+const base_url = "https://api.queensplate.store/api/v1";
 
 // ------------------- CONFIG -------------------
 export const apiClient = axios.create({
