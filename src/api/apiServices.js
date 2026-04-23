@@ -264,3 +264,61 @@ export const updateOrderStatus = async (orderId, status) => {
     throw error;
   }
 };
+
+
+
+// ------------------- AUTH / FORGET PASSWORD API FUNCTIONS -------------------
+
+/**
+ * 1. Request Forget Password OTP
+ * Endpoint: auth/forgot-password
+ * Request: { email: "admin@test.com" }
+ */
+export const forgotPassword = async (email) => {
+  try {
+    const res = await apiClient.post("auth/forgot-password", { email });
+    return res.data;
+  } catch (err) {
+    const errorMsg = 
+      err.response?.data?.message || 
+      err.message || 
+      "Failed to send OTP";
+    throw new Error(errorMsg);
+  }
+};
+
+/**
+ * 2. Verify OTP
+ * Endpoint: auth/verify-otp
+ * Request: { email: "admin@test.com", otp: "5859" }
+ */
+export const verifyOtp = async (data) => {
+  try {
+    const res = await apiClient.post("auth/verify-otp", data);
+    return res.data;
+  } catch (err) {
+    const errorMsg = 
+      err.response?.data?.message || 
+      err.message || 
+      "OTP verification failed";
+    throw new Error(errorMsg);
+  }
+};
+
+/**
+ * 3. Reset Password (Final Step)
+ * Endpoint: auth/reset-password
+ * Request: { email, otp, password, confirm_password }
+ */
+export const resetPassword = async (data) => {
+  try {
+    const res = await apiClient.post("auth/reset-password", data);
+    return res.data;
+  } catch (err) {
+    const errorMsg = 
+      err.response?.data?.message || 
+      err.message || 
+      "Password reset failed";
+    throw new Error(errorMsg);
+  }
+};

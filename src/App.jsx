@@ -20,6 +20,7 @@ import CustomerPage from "./pages/CustomerPage";
 import AdminPermission from "./pages/AdminPermission";
 import ForgetPassword from "./component/Auth/Forget";
 import NotificationsPage from "./pages/Notifications";
+import ResetPassword from "./component/Auth/ResetPassword";
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
       {/* Public Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/forget-password" element={<ForgetPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Protected Admin Routes */}
       <Route

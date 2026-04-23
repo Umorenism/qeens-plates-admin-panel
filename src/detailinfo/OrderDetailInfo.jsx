@@ -540,8 +540,648 @@
 
 
 
+// import { useParams } from "react-router-dom";
+// import { useState, useEffect } from "react";
+// import { getOrderById, updateOrderStatus } from "../api/apiServices"; 
+// import toast from "react-hot-toast";
+
+// export default function OrderDetailInfo() {
+//   const { id } = useParams();
+//   const [order, setOrder] = useState(null);
+//   const [loading, setLoading] = useState(true);
+//   const [updating, setUpdating] = useState(false);
+
+//   // 1. Updated Config with your specific operational keys and colors
+//   const statusConfig = [
+//     { label: "Order Received", key: "received", color: "bg-blue-100 text-blue-700 border-blue-200" },
+//     { label: "Preparing Food", key: "prepared", color: "bg-purple-100 text-purple-700 border-purple-200" },
+//     { label: "Ready to Pickup", key: "ready_for_pick", color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+//     { label: "Out for Delivery", key: "out_for_delivery", color: "bg-orange-100 text-orange-700 border-orange-200" },
+//     { label: "Delivered", key: "delivered", color: "bg-green-100 text-green-700 border-green-200" },
+//   ];
+
+//   const [currentStatus, setCurrentStatus] = useState(null);
+
+//   useEffect(() => {
+//     const fetchOrderDetail = async () => {
+//       try {
+//         setLoading(true);
+//         const response = await getOrderById(id);
+//         if (response.success) {
+//           setOrder(response.data);
+//           // Find initial status object from config
+//           const match = statusConfig.find(s => s.key === response.data.status);
+//           setCurrentStatus(match || statusConfig[0]);
+//         }
+//       } catch (err) {
+//         toast.error("Failed to load order details");
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+//     if (id) fetchOrderDetail();
+//   }, [id]);
+
+//   const handleStatusUpdate = async (statusObj) => {
+//     if (updating) return;
+//     try {
+//       setUpdating(true);
+//       const response = await updateOrderStatus(order.id || id, statusObj.key);
+//       if (response.success) {
+//         setCurrentStatus(statusObj);
+//         toast.success(`Status updated to ${statusObj.label}`);
+//       }
+//     } catch (err) {
+//       toast.error("Failed to update status on server");
+//     } finally {
+//       setUpdating(false);
+//     }
+//   };
+
+//   if (loading) {
+//     return (
+//       <div className="min-h-screen bg-[#f4efe6] flex items-center justify-center font-dm">
+//         <div className="animate-pulse text-gray-500 text-lg font-medium">Loading order details...</div>
+//       </div>
+//     );
+//   }
+
+//   if (!order) {
+//     return (
+//       <div className="min-h-screen bg-[#f4efe6] flex items-center justify-center font-dm">
+//         <p className="text-gray-500">Order not found.</p>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="min-h-screen bg-[#f4efe6] font-dm-sans px-4 py-8 md:p-10">
+//       <div className="mx-auto w-full max-w-5xl space-y-6">
+
+//         {/* Header - Now using dynamic colors */}
+//         <div className="flex justify-between items-center mt-10 flex-wrap gap-3">
+//           <div className="flex flex-col items-start gap-2">
+//             <h1 className="text-[22px] font-Roboto text-[#3A3A3A] font-bold">
+//               {order.order_number}
+//             </h1>
+//             <span className="text-sm text-gray-500">
+//               {order.created_at}
+//             </span>
+//           </div>
+
+//           <div className={`${currentStatus?.color || "bg-orange-100 text-orange-700"} px-4 py-1.5 rounded-full text-sm font-medium border`}>
+//             {currentStatus?.label || "Order Received"}
+//           </div>
+//         </div>
+
+//         {/* Info Grid - Original UI Maintained */}
+//         <div className="grid md:grid-cols-2 gap-6">
+//           <div className="bg-white rounded-2xl p-6 shadow-sm border">
+//             <h2 className="text-[20.5px] font-dm font-semibold text-[#A61E30] mb-4">Customer Info</h2>
+//             <div className="space-y-2 text-sm">
+//               <p><span className="text-gray-500">Name:</span> <span className="font-medium font-dm text-[#000000]">{order.customer?.name}</span></p>
+//               <p><span className="text-gray-500">Phone:</span> <span className="font-medium font-dm text-[#000000]">{order.customer?.phone}</span></p>
+//               <p><span className="text-gray-500">Address:</span> <span className="font-medium font-dm text-[#000000]">{order.customer?.address}</span></p>
+//             </div>
+//           </div>
+
+//           <div className="bg-white rounded-2xl p-6 shadow-sm border">
+//             <h2 className="text-[20.5px] font-dm font-semibold text-[#A61E30] mb-4">Payment</h2>
+//             <div className="space-y-2 text-sm">
+//               <p><span className="text-gray-500 font-dm text-[#3A3A3AB2]">Method:</span> <span className="font-dm text-black">{order.payment?.method}</span></p>
+//               <p>
+//                 <span className="text-gray-500 font-dm text-[#3A3A3AB2]">Status:</span>
+//                 <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold ml-2">{order.payment?.status}</span>
+//               </p>
+//               <p className="pt-2">
+//                 <span className="text-gray-500 font-dm text-[#3A3A3AB2]">Total:</span>
+//                 <span className="text-xl text-black font-bold font-dm">₦{order.payment?.total}</span>
+//               </p>
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Ordered Items - Original UI Maintained */}
+//         <div className="bg-white rounded-2xl p-6 shadow-sm border">
+//           <h2 className="text-[20px] font-dm text-[#A61E30] font-bold mb-5 uppercase">Ordered Items</h2>
+//           <div className="overflow-x-auto">
+//             <table className="w-full text-sm">
+//               <thead className="bg-[#F6E9EA] text-gray-600">
+//                 <tr>
+//                   <th className="text-left px-4 py-3 rounded-l-lg">Item</th>
+//                   <th className="text-center px-4 py-3">Qty</th>
+//                   <th className="text-right px-4 py-3">Price</th>
+//                   <th className="text-right px-4 py-3 rounded-r-lg">Subtotal</th>
+//                 </tr>
+//               </thead>
+//               <tbody className="divide-y divide-gray-50">
+//                 {order.items?.map((item, index) => (
+//                   <tr key={index} className="text-black">
+//                     <td className="px-4 py-4">{item.name}</td>
+//                     <td className="text-center px-4 py-4">{item.quantity}</td>
+//                     <td className="text-right px-4 py-4">₦{item.price}</td>
+//                     <td className="text-right px-4 py-4 font-medium">₦{item.subtotal}</td>
+//                   </tr>
+//                 ))}
+//               </tbody>
+//             </table>
+//           </div>
+//         </div>
+
+//         {/* Status Actions - Buttons Maintained but connected to dynamic logic */}
+//         <div className="bg-white rounded-2xl p-6 shadow-sm border">
+//           <h2 className="text-[20px] font-dm font-bold text-[#A61E30] mb-5 uppercase">Update Status</h2>
+//           <div className="flex flex-wrap gap-3">
+//             {statusConfig.map((status) => (
+//               <button
+//                 key={status.key}
+//                 disabled={updating}
+//                 onClick={() => handleStatusUpdate(status)}
+//                 className={`px-4 py-2 text-sm transition font-dm rounded-[40px] rounded-tl-[5px] ${
+//                   currentStatus?.key === status.key
+//                     ? "bg-[#A61E30] text-white"
+//                     : "bg-[#F3E9B530] border text-gray-700 hover:bg-gray-200"
+//                 } ${updating ? "opacity-50 cursor-not-allowed" : ""}`}
+//               >
+//                 {status.label}
+//               </button>
+//             ))}
+//           </div>
+//         </div>
+
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+
+
+
+
+
+// import { useParams } from "react-router-dom";
+// import { useState, useEffect } from "react";
+// import { getOrderById, updateOrderStatus } from "../api/apiServices"; 
+// import toast from "react-hot-toast";
+
+// export default function OrderDetailInfo() {
+//   const { id } = useParams();
+//   const [order, setOrder] = useState(null);
+//   const [loading, setLoading] = useState(true);
+//   const [updating, setUpdating] = useState(false);
+
+//   const statusConfig = [
+//     { label: "Order Received", key: "received", color: "bg-blue-100 text-blue-700 border-blue-200" },
+//     { label: "Preparing Food", key: "prepared", color: "bg-purple-100 text-purple-700 border-purple-200" },
+//     { label: "Ready to Pickup", key: "Ready_for_pick", color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+//     { label: "Out for Delivery", key: "out_for_delivery", color: "bg-orange-100 text-orange-700 border-orange-200" },
+//     { label: "Delivered", key: "delivered", color: "bg-green-100 text-green-700 border-green-200" },
+//   ];
+
+//   const [currentStatus, setCurrentStatus] = useState(null);
+
+//   useEffect(() => {
+//     const fetchOrderDetail = async () => {
+//       try {
+//         setLoading(true);
+//         const response = await getOrderById(id);
+//         if (response.success) {
+//           setOrder(response.data);
+//           const match = statusConfig.find(s => s.key === response.data.status);
+//           setCurrentStatus(match || statusConfig[0]);
+//         }
+//       } catch (err) {
+//         toast.error("Failed to load order details");
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+//     if (id) fetchOrderDetail();
+//   }, [id]);
+
+//   const handleStatusUpdate = async (statusObj) => {
+//     if (updating) return;
+//     try {
+//       setUpdating(true);
+//       const response = await updateOrderStatus(id, statusObj.key);
+//       if (response.success) {
+//         setCurrentStatus(statusObj);
+//         // Important: Update local order object status to maintain consistency
+//         setOrder(prev => ({ ...prev, status: statusObj.key }));
+//         toast.success(`Status updated to ${statusObj.label}`);
+//       }
+//     } catch (err) {
+//       toast.error("Failed to update status on server");
+//     } finally {
+//       setUpdating(false);
+//     }
+//   };
+
+//   if (loading) return <div className="min-h-screen bg-[#f4efe6] flex items-center justify-center font-dm"><div className="animate-pulse text-gray-500 text-lg font-medium">Loading...</div></div>;
+//   if (!order) return <div className="min-h-screen bg-[#f4efe6] flex items-center justify-center font-dm"><p className="text-gray-500">Order not found.</p></div>;
+
+//   return (
+//     <div className="min-h-screen bg-[#f4efe6] font-dm-sans px-4 py-8 md:p-10">
+//       <div className="mx-auto w-full max-w-5xl space-y-6">
+//         <div className="flex justify-between items-center mt-10 flex-wrap gap-3">
+//           <div className="flex flex-col items-start gap-2">
+//             <h1 className="text-[22px] font-Roboto text-[#3A3A3A] font-bold">{order.order_number}</h1>
+//             <span className="text-sm text-gray-500">{order.created_at}</span>
+//           </div>
+//           <div className={`${currentStatus?.color} px-4 py-1.5 rounded-full text-sm font-medium border`}>
+//             {currentStatus?.label}
+//           </div>
+//         </div>
+
+//         <div className="grid md:grid-cols-2 gap-6">
+//           <div className="bg-white rounded-2xl p-6 shadow-sm border">
+//             <h2 className="text-[20.5px] font-dm font-semibold text-[#A61E30] mb-4">Customer Info</h2>
+//             <div className="space-y-2 text-sm">
+//               <p><span className="text-gray-500">Name:</span> <span className="font-medium font-dm text-[#000000]">{order.customer?.name}</span></p>
+//               <p><span className="text-gray-500">Phone:</span> <span className="font-medium font-dm text-[#000000]">{order.customer?.phone}</span></p>
+//               <p><span className="text-gray-500">Address:</span> <span className="font-medium font-dm text-[#000000]">{order.customer?.address}</span></p>
+//             </div>
+//           </div>
+
+//           <div className="bg-white rounded-2xl p-6 shadow-sm border">
+//             <h2 className="text-[20.5px] font-dm font-semibold text-[#A61E30] mb-4">Payment</h2>
+//             <div className="space-y-2 text-sm">
+//               <p><span className="text-gray-500">Method:</span> <span className="text-black">{order.payment?.method}</span></p>
+//               <p><span className="text-gray-500">Status:</span> <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold ml-2">{order.payment?.status}</span></p>
+//               <p className="pt-2"><span className="text-gray-500">Total:</span> <span className="text-xl text-black font-bold font-dm">₦{order.payment?.total}</span></p>
+//             </div>
+//           </div>
+//         </div>
+
+//         <div className="bg-white rounded-2xl p-6 shadow-sm border">
+//           <h2 className="text-[20px] font-dm text-[#A61E30] font-bold mb-5 uppercase">Ordered Items</h2>
+//           <div className="overflow-x-auto">
+//             <table className="w-full text-sm">
+//               <thead className="bg-[#F6E9EA] text-gray-600">
+//                 <tr>
+//                   <th className="text-left px-4 py-3 rounded-l-lg">Item</th>
+//                   <th className="text-center px-4 py-3">Qty</th>
+//                   <th className="text-right px-4 py-3">Price</th>
+//                   <th className="text-right px-4 py-3 rounded-r-lg">Subtotal</th>
+//                 </tr>
+//               </thead>
+//               <tbody className="divide-y divide-gray-50">
+//                 {order.items?.map((item, index) => (
+//                   <tr key={index} className="text-black">
+//                     <td className="px-4 py-4">{item.name}</td>
+//                     <td className="text-center px-4 py-4">{item.quantity}</td>
+//                     <td className="text-right px-4 py-4">₦{item.price}</td>
+//                     <td className="text-right px-4 py-4 font-medium">₦{item.subtotal}</td>
+//                   </tr>
+//                 ))}
+//               </tbody>
+//             </table>
+//           </div>
+//         </div>
+
+//         <div className="bg-white rounded-2xl p-6 shadow-sm border">
+//           <h2 className="text-[20px] font-dm font-bold text-[#A61E30] mb-5 uppercase">Update Status</h2>
+//           <div className="flex flex-wrap gap-3">
+//             {statusConfig.map((status) => (
+//               <button
+//                 key={status.key}
+//                 disabled={updating}
+//                 onClick={() => handleStatusUpdate(status)}
+//                 className={`px-4 py-2 text-sm transition font-dm rounded-[40px] rounded-tl-[5px] ${
+//                   currentStatus?.key === status.key ? "bg-[#A61E30] text-white" : "bg-[#F3E9B530] border text-gray-700 hover:bg-gray-200"
+//                 } ${updating ? "opacity-50 cursor-not-allowed" : ""}`}
+//               >
+//                 {status.label}
+//               </button>
+//             ))}
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+
+
+
+// import { useParams } from "react-router-dom";
+// import { useState, useEffect } from "react";
+// import { getOrderById, updateOrderStatus } from "../api/apiServices"; 
+// import toast from "react-hot-toast";
+
+// export default function OrderDetailInfo() {
+//   const { id } = useParams();
+//   const [order, setOrder] = useState(null);
+//   const [loading, setLoading] = useState(true);
+//   const [updating, setUpdating] = useState(false);
+
+//   const statusConfig = [
+//     { label: "Order Received", key: "received", color: "bg-blue-100 text-blue-700 border-blue-200" },
+//     { label: "Preparing Food", key: "prepared", color: "bg-purple-100 text-purple-700 border-purple-200" },
+//     { label: "Ready to Pickup", key: "Ready_for_pick", color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+//     { label: "Out for Delivery", key: "out_for_delivery", color: "bg-orange-100 text-orange-700 border-orange-200" },
+//     { label: "Delivered", key: "delivered", color: "bg-green-100 text-green-700 border-green-200" },
+//   ];
+
+//   const [currentStatus, setCurrentStatus] = useState(null);
+
+//   useEffect(() => {
+//     const fetchOrderDetail = async () => {
+//       try {
+//         setLoading(true);
+//         const response = await getOrderById(id);
+//         if (response.success) {
+//           setOrder(response.data);
+//           const match = statusConfig.find(s => s.key === response.data.status);
+//           setCurrentStatus(match || statusConfig[0]);
+//         }
+//       } catch (err) {
+//         toast.error("Failed to load order details");
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+//     if (id) fetchOrderDetail();
+//   }, [id]);
+
+//   const handleStatusUpdate = async (statusObj) => {
+//     if (updating) return;
+//     try {
+//       setUpdating(true);
+//       // We use the ID from the URL (which is numeric) to call the API
+//       const response = await updateOrderStatus(id, statusObj.key);
+//       if (response.success) {
+//         setCurrentStatus(statusObj);
+//         // Important: Update local state so it matches the OrdersPage exactly
+//         setOrder(prev => ({ 
+//           ...prev, 
+//           status: statusObj.key 
+//         }));
+//         toast.success(`Status updated to ${statusObj.label}`);
+//       }
+//     } catch (err) {
+//       toast.error("Failed to update status on server");
+//     } finally {
+//       setUpdating(false);
+//     }
+//   };
+
+//   if (loading) return <div className="min-h-screen bg-[#f4efe6] flex items-center justify-center font-dm"><div className="animate-pulse text-gray-500 text-lg font-medium">Loading...</div></div>;
+//   if (!order) return <div className="min-h-screen bg-[#f4efe6] flex items-center justify-center font-dm"><p className="text-gray-500">Order not found.</p></div>;
+
+//   return (
+//     <div className="min-h-screen bg-[#f4efe6] font-dm-sans px-4 py-8 md:p-10">
+//       <div className="mx-auto w-full max-w-5xl space-y-6">
+//         <div className="flex justify-between items-center mt-10 flex-wrap gap-3">
+//           <div className="flex flex-col items-start gap-2">
+//             <h1 className="text-[22px] font-Roboto text-[#3A3A3A] font-bold">{order.order_id}</h1>
+//             <span className="text-sm text-gray-500">{order.date}</span>
+//           </div>
+//           <div className={`${currentStatus?.color} px-4 py-1.5 rounded-full text-sm font-medium border`}>
+//             {currentStatus?.label}
+//           </div>
+//         </div>
+
+//         <div className="grid md:grid-cols-2 gap-6">
+//           <div className="bg-white rounded-2xl p-6 shadow-sm border">
+//             <h2 className="text-[20.5px] font-dm font-semibold text-[#A61E30] mb-4">Customer Info</h2>
+//             <div className="space-y-2 text-sm">
+//               <p><span className="text-gray-500">Name:</span> <span className="font-medium font-dm text-[#000000]">{order.customer?.name}</span></p>
+//               <p><span className="text-gray-500">Phone:</span> <span className="font-medium font-dm text-[#000000]">{order.customer?.phone || "N/A"}</span></p>
+//               <p><span className="text-gray-500">Address:</span> <span className="font-medium font-dm text-[#000000]">{order.customer?.address || "N/A"}</span></p>
+//             </div>
+//           </div>
+
+//           <div className="bg-white rounded-2xl p-6 shadow-sm border">
+//             <h2 className="text-[20.5px] font-dm font-semibold text-[#A61E30] mb-4">Payment</h2>
+//             <div className="space-y-2 text-sm">
+//               <p><span className="text-gray-500">Method:</span> <span className="text-black">{order.payment?.method || "N/A"}</span></p>
+//               <p><span className="text-gray-500">Status:</span> <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold ml-2">{order.payment?.status || "Paid"}</span></p>
+//               <p className="pt-2"><span className="text-gray-500">Total:</span> <span className="text-xl text-black font-bold font-dm">₦{order.total}</span></p>
+//             </div>
+//           </div>
+//         </div>
+
+//         <div className="bg-white rounded-2xl p-6 shadow-sm border">
+//           <h2 className="text-[20px] font-dm text-[#A61E30] font-bold mb-5 uppercase">Ordered Items</h2>
+//           <div className="overflow-x-auto">
+//             <table className="w-full text-sm">
+//               <thead className="bg-[#F6E9EA] text-gray-600">
+//                 <tr>
+//                   <th className="text-left px-4 py-3 rounded-l-lg">Item</th>
+//                   <th className="text-center px-4 py-3">Qty</th>
+//                   <th className="text-right px-4 py-3">Price</th>
+//                   <th className="text-right px-4 py-3 rounded-r-lg">Subtotal</th>
+//                 </tr>
+//               </thead>
+//               <tbody className="divide-y divide-gray-50">
+//                 {order.items?.map((item, index) => (
+//                   <tr key={index} className="text-black">
+//                     <td className="px-4 py-4">{item.name}</td>
+//                     <td className="text-center px-4 py-4">{item.quantity}</td>
+//                     <td className="text-right px-4 py-4">₦{item.price}</td>
+//                     <td className="text-right px-4 py-4 font-medium">₦{item.subtotal}</td>
+//                   </tr>
+//                 ))}
+//               </tbody>
+//             </table>
+//           </div>
+//         </div>
+
+//         <div className="bg-white rounded-2xl p-6 shadow-sm border">
+//           <h2 className="text-[20px] font-dm font-bold text-[#A61E30] mb-5 uppercase">Update Status</h2>
+//           <div className="flex flex-wrap gap-3">
+//             {statusConfig.map((status) => (
+//               <button
+//                 key={status.key}
+//                 disabled={updating}
+//                 onClick={() => handleStatusUpdate(status)}
+//                 className={`px-4 py-2 text-sm transition font-dm rounded-[40px] rounded-tl-[5px] ${
+//                   currentStatus?.key === status.key ? "bg-[#A61E30] text-white" : "bg-[#F3E9B530] border text-gray-700 hover:bg-gray-200"
+//                 } ${updating ? "opacity-50 cursor-not-allowed" : ""}`}
+//               >
+//                 {status.label}
+//               </button>
+//             ))}
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+
+// import { useParams } from "react-router-dom";
+// import { useState, useEffect } from "react";
+// import { getOrderById, updateOrderStatus } from "../api/apiServices"; 
+// import toast from "react-hot-toast";
+
+// export default function OrderDetailInfo() {
+//   const { id } = useParams(); // This is the numeric ID from the URL
+//   const [order, setOrder] = useState(null);
+//   const [loading, setLoading] = useState(true);
+//   const [updating, setUpdating] = useState(false);
+
+//   const statusConfig = [
+//     { label: "Order Received", key: "received", color: "bg-blue-100 text-blue-700 border-blue-200" },
+//     { label: "Preparing Food", key: "prepared", color: "bg-purple-100 text-purple-700 border-purple-200" },
+//     { label: "Ready to Pickup", key: "Ready_for_pick", color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+//     { label: "Out for Delivery", key: "out_for_delivery", color: "bg-orange-100 text-orange-700 border-orange-200" },
+//     { label: "Delivered", key: "delivered", color: "bg-green-100 text-green-700 border-green-200" },
+//   ];
+
+//   const [currentStatus, setCurrentStatus] = useState(null);
+
+//   useEffect(() => {
+//     const fetchOrderDetail = async () => {
+//       try {
+//         setLoading(true);
+//         const response = await getOrderById(id);
+//         if (response.success) {
+//           setOrder(response.data);
+//           // Match current status slug from API to our config
+//           const match = statusConfig.find(s => 
+//             s.key.toLowerCase() === response.data.status.toLowerCase().replace(/ /g, '_')
+//           );
+//           setCurrentStatus(match || statusConfig[0]);
+//         }
+//       } catch (err) {
+//         toast.error("Failed to load order details");
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+//     if (id) fetchOrderDetail();
+//   }, [id]);
+
+//   const handleStatusUpdate = async (statusObj) => {
+//     if (updating) return;
+//     try {
+//       setUpdating(true);
+      
+//       // Update using the numeric ID as required by your endpoint
+//       const response = await updateOrderStatus(id, statusObj.key);
+      
+//       if (response.success) {
+//         setCurrentStatus(statusObj);
+        
+//         // Update local state: Use total_amount from update res or keep existing total
+//         setOrder(prev => ({ 
+//           ...prev, 
+//           status: statusObj.key,
+//           // Sync with the updated_at time if provided by API
+//           created_at: response.data.updated_at || prev.created_at 
+//         }));
+        
+//         toast.success(`Status updated to ${statusObj.label}`);
+//       }
+//     } catch (err) {
+//       toast.error("Failed to update status on server");
+//     } finally {
+//       setUpdating(false);
+//     }
+//   };
+
+//   if (loading) return <div className="min-h-screen bg-[#f4efe6] flex items-center justify-center font-dm"><div className="animate-pulse text-gray-500 text-lg font-medium">Loading...</div></div>;
+//   if (!order) return <div className="min-h-screen bg-[#f4efe6] flex items-center justify-center font-dm"><p className="text-gray-500">Order not found.</p></div>;
+
+//   return (
+//     <div className="min-h-screen bg-[#f4efe6] font-dm-sans px-4 py-8 md:p-10">
+//       <div className="mx-auto w-full max-w-5xl space-y-6">
+//         <div className="flex justify-between items-center mt-10 flex-wrap gap-3">
+//           <div className="flex flex-col items-start gap-2">
+//             <h1 className="text-[22px] font-Roboto text-[#3A3A3A] font-bold">{order.order_number}</h1>
+//             <span className="text-sm text-gray-500">{order.created_at}</span>
+//           </div>
+//           <div className={`${currentStatus?.color} px-4 py-1.5 rounded-full text-sm font-medium border`}>
+//             {currentStatus?.label}
+//           </div>
+//         </div>
+
+//         <div className="grid md:grid-cols-2 gap-6">
+//           <div className="bg-white rounded-2xl p-6 shadow-sm border">
+//             <h2 className="text-[20.5px] font-dm font-semibold text-[#A61E30] mb-4">Customer Info</h2>
+//             <div className="space-y-2 text-sm">
+//               <p><span className="text-gray-500">Name:</span> <span className="font-medium font-dm text-[#000000]">{order.customer?.name}</span></p>
+//               <p><span className="text-gray-500">Phone:</span> <span className="font-medium font-dm text-[#000000]">{order.customer?.phone}</span></p>
+//               <p><span className="text-gray-500">Address:</span> <span className="font-medium font-dm text-[#000000]">{order.customer?.address}</span></p>
+//             </div>
+//           </div>
+
+//           <div className="bg-white rounded-2xl p-6 shadow-sm border">
+//             <h2 className="text-[20.5px] font-dm font-semibold text-[#A61E30] mb-4">Payment</h2>
+//             <div className="space-y-2 text-sm">
+//               <p><span className="text-gray-500">Method:</span> <span className="text-black">{order.payment?.method}</span></p>
+//               <p><span className="text-gray-500">Status:</span> <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold ml-2">{order.payment?.status}</span></p>
+//               <p className="pt-2">
+//                 <span className="text-gray-500">Total:</span> 
+//                 <span className="text-xl text-black font-bold font-dm"> ₦{order.payment?.total || order.total_amount}</span>
+//               </p>
+//             </div>
+//           </div>
+//         </div>
+
+//         <div className="bg-white rounded-2xl p-6 shadow-sm border">
+//           <h2 className="text-[20px] font-dm text-[#A61E30] font-bold mb-5 uppercase">Ordered Items</h2>
+//           <div className="overflow-x-auto">
+//             <table className="w-full text-sm">
+//               <thead className="bg-[#F6E9EA] text-gray-600">
+//                 <tr>
+//                   <th className="text-left px-4 py-3 rounded-l-lg">Item</th>
+//                   <th className="text-center px-4 py-3">Qty</th>
+//                   <th className="text-right px-4 py-3">Price</th>
+//                   <th className="text-right px-4 py-3 rounded-r-lg">Subtotal</th>
+//                 </tr>
+//               </thead>
+//               <tbody className="divide-y divide-gray-50">
+//                 {order.items?.map((item, index) => (
+//                   <tr key={index} className="text-black">
+//                     <td className="px-4 py-4">{item.name}</td>
+//                     <td className="text-center px-4 py-4">{item.quantity}</td>
+//                     <td className="text-right px-4 py-4">₦{item.price}</td>
+//                     <td className="text-right px-4 py-4 font-medium">₦{item.subtotal}</td>
+//                   </tr>
+//                 ))}
+//               </tbody>
+//             </table>
+//           </div>
+//         </div>
+
+//         <div className="bg-white rounded-2xl p-6 shadow-sm border">
+//           <h2 className="text-[20px] font-dm font-bold text-[#A61E30] mb-5 uppercase">Update Status</h2>
+//           <div className="flex flex-wrap gap-3">
+//             {statusConfig.map((status) => (
+//               <button
+//                 key={status.key}
+//                 disabled={updating}
+//                 onClick={() => handleStatusUpdate(status)}
+//                 className={`px-4 py-2 text-sm transition font-dm rounded-[40px] rounded-tl-[5px] ${
+//                   currentStatus?.key === status.key ? "bg-[#A61E30] text-white" : "bg-[#F3E9B530] border text-gray-700 hover:bg-gray-200"
+//                 } ${updating ? "opacity-50 cursor-not-allowed" : ""}`}
+//               >
+//                 {status.label}
+//               </button>
+//             ))}
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+
+
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { getOrderById, updateOrderStatus } from "../api/apiServices"; 
 import toast from "react-hot-toast";
 
@@ -550,12 +1190,12 @@ export default function OrderDetailInfo() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const navigate = useNavigate();
 
-  // 1. Updated Config with your specific operational keys and colors
   const statusConfig = [
     { label: "Order Received", key: "received", color: "bg-blue-100 text-blue-700 border-blue-200" },
     { label: "Preparing Food", key: "prepared", color: "bg-purple-100 text-purple-700 border-purple-200" },
-    { label: "Ready to Pickup", key: "ready_for_pick", color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
+    { label: "Ready to Pickup", key: "Ready_for_pick", color: "bg-yellow-100 text-yellow-800 border-yellow-200" },
     { label: "Out for Delivery", key: "out_for_delivery", color: "bg-orange-100 text-orange-700 border-orange-200" },
     { label: "Delivered", key: "delivered", color: "bg-green-100 text-green-700 border-green-200" },
   ];
@@ -569,8 +1209,11 @@ export default function OrderDetailInfo() {
         const response = await getOrderById(id);
         if (response.success) {
           setOrder(response.data);
-          // Find initial status object from config
-          const match = statusConfig.find(s => s.key === response.data.status);
+          // Standardize status finding
+          const statusFromApi = response.data.status;
+          const match = statusConfig.find(s => 
+            s.label === statusFromApi || s.key === statusFromApi
+          );
           setCurrentStatus(match || statusConfig[0]);
         }
       } catch (err) {
@@ -586,11 +1229,23 @@ export default function OrderDetailInfo() {
     if (updating) return;
     try {
       setUpdating(true);
-      const response = await updateOrderStatus(order.id || id, statusObj.key);
-      if (response.success) {
-        setCurrentStatus(statusObj);
-        toast.success(`Status updated to ${statusObj.label}`);
-      }
+      // Calls POST with { order_id: id, status: statusObj.key }
+      const response = await updateOrderStatus(id, statusObj.key);
+      
+   if (response.success) {
+  setCurrentStatus(statusObj);
+
+  setOrder(prev => ({
+    ...prev,
+    status: statusObj.label
+  }));
+
+  toast.success(`Status updated to ${statusObj.label}`);
+
+  navigate("/dashboard/orders", {
+    state: { refresh: true }
+  });
+}
     } catch (err) {
       toast.error("Failed to update status on server");
     } finally {
@@ -598,43 +1253,22 @@ export default function OrderDetailInfo() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#f4efe6] flex items-center justify-center font-dm">
-        <div className="animate-pulse text-gray-500 text-lg font-medium">Loading order details...</div>
-      </div>
-    );
-  }
-
-  if (!order) {
-    return (
-      <div className="min-h-screen bg-[#f4efe6] flex items-center justify-center font-dm">
-        <p className="text-gray-500">Order not found.</p>
-      </div>
-    );
-  }
+  if (loading) return <div className="min-h-screen bg-[#f4efe6] flex items-center justify-center font-dm"><div className="animate-pulse text-gray-500 text-lg font-medium">Loading...</div></div>;
+  if (!order) return <div className="min-h-screen bg-[#f4efe6] flex items-center justify-center font-dm"><p className="text-gray-500">Order not found.</p></div>;
 
   return (
     <div className="min-h-screen bg-[#f4efe6] font-dm-sans px-4 py-8 md:p-10">
       <div className="mx-auto w-full max-w-5xl space-y-6">
-
-        {/* Header - Now using dynamic colors */}
         <div className="flex justify-between items-center mt-10 flex-wrap gap-3">
           <div className="flex flex-col items-start gap-2">
-            <h1 className="text-[22px] font-Roboto text-[#3A3A3A] font-bold">
-              {order.order_number}
-            </h1>
-            <span className="text-sm text-gray-500">
-              {order.created_at}
-            </span>
+            <h1 className="text-[22px] font-Roboto text-[#3A3A3A] font-bold">{order.order_number}</h1>
+            <span className="text-sm text-gray-500">{order.created_at}</span>
           </div>
-
-          <div className={`${currentStatus?.color || "bg-orange-100 text-orange-700"} px-4 py-1.5 rounded-full text-sm font-medium border`}>
-            {currentStatus?.label || "Order Received"}
+          <div className={`${currentStatus?.color} px-4 py-1.5 rounded-full text-sm font-medium border`}>
+            {currentStatus?.label}
           </div>
         </div>
 
-        {/* Info Grid - Original UI Maintained */}
         <div className="grid md:grid-cols-2 gap-6">
           <div className="bg-white rounded-2xl p-6 shadow-sm border">
             <h2 className="text-[20.5px] font-dm font-semibold text-[#A61E30] mb-4">Customer Info</h2>
@@ -648,20 +1282,16 @@ export default function OrderDetailInfo() {
           <div className="bg-white rounded-2xl p-6 shadow-sm border">
             <h2 className="text-[20.5px] font-dm font-semibold text-[#A61E30] mb-4">Payment</h2>
             <div className="space-y-2 text-sm">
-              <p><span className="text-gray-500 font-dm text-[#3A3A3AB2]">Method:</span> <span className="font-dm text-black">{order.payment?.method}</span></p>
-              <p>
-                <span className="text-gray-500 font-dm text-[#3A3A3AB2]">Status:</span>
-                <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold ml-2">{order.payment?.status}</span>
-              </p>
+              <p><span className="text-gray-500">Method:</span> <span className="text-black">{order.payment?.method}</span></p>
+              <p><span className="text-gray-500">Status:</span> <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold ml-2">{order.payment?.status}</span></p>
               <p className="pt-2">
-                <span className="text-gray-500 font-dm text-[#3A3A3AB2]">Total:</span>
-                <span className="text-xl text-black font-bold font-dm">₦{order.payment?.total}</span>
+                <span className="text-gray-500">Total:</span> 
+                <span className="text-xl text-black font-bold font-dm"> ₦{order.payment?.total}</span>
               </p>
             </div>
           </div>
         </div>
 
-        {/* Ordered Items - Original UI Maintained */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border">
           <h2 className="text-[20px] font-dm text-[#A61E30] font-bold mb-5 uppercase">Ordered Items</h2>
           <div className="overflow-x-auto">
@@ -688,7 +1318,6 @@ export default function OrderDetailInfo() {
           </div>
         </div>
 
-        {/* Status Actions - Buttons Maintained but connected to dynamic logic */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border">
           <h2 className="text-[20px] font-dm font-bold text-[#A61E30] mb-5 uppercase">Update Status</h2>
           <div className="flex flex-wrap gap-3">
@@ -698,9 +1327,7 @@ export default function OrderDetailInfo() {
                 disabled={updating}
                 onClick={() => handleStatusUpdate(status)}
                 className={`px-4 py-2 text-sm transition font-dm rounded-[40px] rounded-tl-[5px] ${
-                  currentStatus?.key === status.key
-                    ? "bg-[#A61E30] text-white"
-                    : "bg-[#F3E9B530] border text-gray-700 hover:bg-gray-200"
+                  currentStatus?.key === status.key ? "bg-[#A61E30] text-white" : "bg-[#F3E9B530] border text-gray-700 hover:bg-gray-200"
                 } ${updating ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 {status.label}
@@ -708,7 +1335,6 @@ export default function OrderDetailInfo() {
             ))}
           </div>
         </div>
-
       </div>
     </div>
   );
