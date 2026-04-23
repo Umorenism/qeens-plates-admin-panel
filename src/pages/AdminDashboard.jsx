@@ -1578,9 +1578,11 @@ export const AdminDashboard = () => {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="flex items-center justify-between px-6 py-4 border-b">
             <h3 className="text-lg font-semibold text-gray-800">Recent Orders</h3>
+
             <button className="text-red-600 hover:text-red-700 text-sm font-medium flex items-center gap-1.5">
               View All →
             </button>
+           
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[700px]">
