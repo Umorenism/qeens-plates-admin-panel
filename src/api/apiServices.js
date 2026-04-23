@@ -249,3 +249,18 @@ export const updateMenuItem = async (id, formData) => {
   );
   return response.data;
 };
+
+
+
+export const updateOrderStatus = async (orderId, status) => {
+  try {
+    const response = await adminApi.post("/admin/orders/update-status", {
+      order_id: orderId,
+      status: status,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating status:", error.response?.data || error.message);
+    throw error;
+  }
+};

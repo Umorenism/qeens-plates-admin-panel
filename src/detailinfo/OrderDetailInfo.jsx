@@ -165,22 +165,217 @@
 
 
 
+// import { useParams } from "react-router-dom";
+// import { useState, useEffect } from "react";
+// import { getOrderById } from "../api/apiServices";
+// import toast from "react-hot-toast";
+
+// export default function OrderDetailInfo() {
+//   const { id } = useParams();
+//   const [order, setOrder] = useState(null);
+//   const [loading, setLoading] = useState(true);
+
+//   const statuses = [
+//     "Order Received",
+//     "Prepared Food",
+//     "Ready for Pick",
+//     "Out for Delivery",
+//     "Delivered",
+//   ];
+
+//   const [currentStatus, setCurrentStatus] = useState("");
+
+//   useEffect(() => {
+//     const fetchOrderDetail = async () => {
+//       try {
+//         setLoading(true);
+//         const response = await getOrderById(id);
+//         if (response.success) {
+//           // Setting the data from res.data
+//           setOrder(response.data);
+//           setCurrentStatus(response.data.status || "Order Received");
+//         }
+//       } catch (err) {
+//         console.error("Error fetching order:", err);
+//         toast.error("Failed to load order details");
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     if (id) fetchOrderDetail();
+//   }, [id]);
+
+//   if (loading) {
+//     return (
+//       <div className="min-h-screen bg-[#f4efe6] flex items-center justify-center font-dm">
+//         <div className="animate-pulse text-gray-500 text-lg font-medium">Loading order details...</div>
+//       </div>
+//     );
+//   }
+
+//   if (!order) {
+//     return (
+//       <div className="min-h-screen bg-[#f4efe6] flex items-center justify-center font-dm">
+//         <p className="text-gray-500">Order not found.</p>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="min-h-screen bg-[#f4efe6] font-dm-sans px-4 py-8 md:p-10">
+//       <div className="mx-auto w-full max-w-5xl space-y-6">
+
+//         {/* Header */}
+//         <div className="flex justify-between items-center mt-10 flex-wrap gap-3">
+//           <div className="flex flex-col items-start gap-2">
+//             <h1 className="text-[22px] font-Roboto text-[#3A3A3A] font-bold">
+//               {order.order_number}
+//             </h1>
+//             <span className="text-sm text-gray-500">
+//               {order.created_at}
+//             </span>
+//           </div>
+
+//           <div className="bg-orange-100 text-orange-700 px-4 py-1.5 rounded-full text-sm font-medium">
+//             {currentStatus}
+//           </div>
+//         </div>
+
+//         {/* Info Grid */}
+//         <div className="grid md:grid-cols-2 gap-6">
+          
+//           {/* Customer Card */}
+//           <div className="bg-white rounded-2xl p-6 shadow-sm border">
+//             <h2 className="text-[20.5px] font-dm font-semibold text-[#A61E30] mb-4">
+//               Customer Info
+//             </h2>
+
+//             <div className="space-y-2 text-sm">
+//               <p>
+//                 <span className="text-gray-500">Name:</span>{" "}
+//                 <span className="font-medium font-dm text-[#000000]">{order.customer?.name}</span>
+//               </p>
+//               <p>
+//                 <span className="text-gray-500">Phone:</span>{" "}
+//                 <span className="font-medium font-dm text-[#000000]">{order.customer?.phone}</span>
+//               </p>
+//               <p>
+//                 <span className="text-gray-500">Address:</span>{" "}
+//                 <span className="font-medium font-dm text-[#000000]">{order.customer?.address}</span>
+//               </p>
+//             </div>
+//           </div>
+
+//           {/* Payment Card - Updated for your new Response */}
+//           <div className="bg-white rounded-2xl p-6 shadow-sm border">
+//             <h2 className="text-[20.5px] font-dm font-semibold text-[#A61E30] mb-4">
+//               Payment
+//             </h2>
+
+//             <div className="space-y-2 text-sm">
+//               <p>
+//                 <span className="text-gray-500 font-dm text-[#3A3A3AB2]">Method:</span>{" "}
+//                 <span className="font-dm text-black">{order.payment?.method}</span>
+//               </p>
+//               <p>
+//                 <span className="text-gray-500 font-dm text-[#3A3A3AB2]">Status:</span>{" "}
+//                 <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold ml-2">
+//                   {order.payment?.status}
+//                 </span>
+//               </p>
+//               <p className="pt-2">
+//                 <span className="text-gray-500 font-dm text-[#3A3A3AB2]">Total:</span>{" "}
+//                 <span className="text-xl text-black font-bold font-dm">₦{order.payment?.total}</span>
+//               </p>
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Ordered Items */}
+//         <div className="bg-white rounded-2xl p-6 shadow-sm border">
+//           <h2 className="text-[20px] font-dm text-[#A61E30] font-bold mb-5">
+//             ORDERED ITEMS
+//           </h2>
+
+//           <div className="overflow-x-auto">
+//             <table className="w-full text-sm">
+//               <thead className="bg-[#F6E9EA] text-gray-600">
+//                 <tr>
+//                   <th className="text-left px-4 py-3 rounded-l-lg">Item</th>
+//                   <th className="text-center px-4 py-3">Qty</th>
+//                   <th className="text-right px-4 py-3">Price</th>
+//                   <th className="text-right px-4 py-3 rounded-r-lg">Subtotal</th>
+//                 </tr>
+//               </thead>
+
+//               <tbody className="divide-y divide-gray-50">
+//                 {order.items?.map((item, index) => (
+//                   <tr key={index} className="text-black">
+//                     <td className="px-4 py-4">{item.name}</td>
+//                     <td className="text-center px-4 py-4">{item.quantity}</td>
+//                     <td className="text-right px-4 py-4">₦{item.price}</td>
+//                     <td className="text-right px-4 py-4 font-medium">₦{item.subtotal}</td>
+//                   </tr>
+//                 ))}
+//               </tbody>
+//             </table>
+//           </div>
+//         </div>
+
+//         {/* Status Actions */}
+//         <div className="bg-white rounded-2xl p-6 shadow-sm border">
+//           <h2 className="text-[20px] font-dm font-bold text-[#A61E30] mb-5">
+//             UPDATE STATUS
+//           </h2>
+
+//           <div className="flex flex-wrap gap-3">
+//             {statuses.map((status) => (
+//               <button
+//                 key={status}
+//                 onClick={() => setCurrentStatus(status)}
+//                 className={`px-4 py-2 text-sm transition font-dm rounded-[40px] rounded-tl-[5px] ${
+//                   currentStatus === status
+//                     ? "bg-[#A61E30] text-white"
+//                     : "bg-[#F3E9B530] border text-gray-700 hover:bg-gray-200"
+//                 }`}
+//               >
+//                 {status}
+//               </button>
+//             ))}
+//           </div>
+//         </div>
+
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+
+
+
+
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { getOrderById } from "../api/apiServices";
+// Add updateOrderStatus to your imports
+import { getOrderById, updateOrderStatus } from "../api/apiServices"; 
 import toast from "react-hot-toast";
 
 export default function OrderDetailInfo() {
   const { id } = useParams();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false); // New state for loading buttons
 
-  const statuses = [
-    "Order Received",
-    "Prepared Food",
-    "Ready for Pick",
-    "Out for Delivery",
-    "Delivered",
+  // Mapping Display Text to Backend Status Keys
+  const statusConfig = [
+    { label: "Order Received", key: "received" },
+    { label: "Prepared Food", key: "prepared" },
+    { label: "Ready for Pick", key: "ready_for_pick" },
+    { label: "Out for Delivery", key: "out_for_delivery" },
+    { label: "Delivered", key: "delivered" },
   ];
 
   const [currentStatus, setCurrentStatus] = useState("");
@@ -191,20 +386,38 @@ export default function OrderDetailInfo() {
         setLoading(true);
         const response = await getOrderById(id);
         if (response.success) {
-          // Setting the data from res.data
           setOrder(response.data);
-          setCurrentStatus(response.data.status || "Order Received");
+          // Find the label that matches the key from the server
+          const match = statusConfig.find(s => s.key === response.data.status);
+          setCurrentStatus(match ? match.label : "Order Received");
         }
       } catch (err) {
-        console.error("Error fetching order:", err);
         toast.error("Failed to load order details");
       } finally {
         setLoading(false);
       }
     };
-
     if (id) fetchOrderDetail();
   }, [id]);
+
+  // NEW: Function to send update to server
+  const handleStatusUpdate = async (statusLabel, statusKey) => {
+    if (updating) return;
+    
+    try {
+      setUpdating(true);
+      const response = await updateOrderStatus(order.id, statusKey);
+      
+      if (response.success) {
+        setCurrentStatus(statusLabel);
+        toast.success("Status updated successfully");
+      }
+    } catch (err) {
+      toast.error("Failed to update status on server");
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -244,48 +457,25 @@ export default function OrderDetailInfo() {
 
         {/* Info Grid */}
         <div className="grid md:grid-cols-2 gap-6">
-          
-          {/* Customer Card */}
           <div className="bg-white rounded-2xl p-6 shadow-sm border">
-            <h2 className="text-[20.5px] font-dm font-semibold text-[#A61E30] mb-4">
-              Customer Info
-            </h2>
-
+            <h2 className="text-[20.5px] font-dm font-semibold text-[#A61E30] mb-4">Customer Info</h2>
             <div className="space-y-2 text-sm">
-              <p>
-                <span className="text-gray-500">Name:</span>{" "}
-                <span className="font-medium font-dm text-[#000000]">{order.customer?.name}</span>
-              </p>
-              <p>
-                <span className="text-gray-500">Phone:</span>{" "}
-                <span className="font-medium font-dm text-[#000000]">{order.customer?.phone}</span>
-              </p>
-              <p>
-                <span className="text-gray-500">Address:</span>{" "}
-                <span className="font-medium font-dm text-[#000000]">{order.customer?.address}</span>
-              </p>
+              <p><span className="text-gray-500">Name:</span> <span className="font-medium font-dm text-[#000000]">{order.customer?.name}</span></p>
+              <p><span className="text-gray-500">Phone:</span> <span className="font-medium font-dm text-[#000000]">{order.customer?.phone}</span></p>
+              <p><span className="text-gray-500">Address:</span> <span className="font-medium font-dm text-[#000000]">{order.customer?.address}</span></p>
             </div>
           </div>
 
-          {/* Payment Card - Updated for your new Response */}
           <div className="bg-white rounded-2xl p-6 shadow-sm border">
-            <h2 className="text-[20.5px] font-dm font-semibold text-[#A61E30] mb-4">
-              Payment
-            </h2>
-
+            <h2 className="text-[20.5px] font-dm font-semibold text-[#A61E30] mb-4">Payment</h2>
             <div className="space-y-2 text-sm">
+              <p><span className="text-gray-500 font-dm text-[#3A3A3AB2]">Method:</span> <span className="font-dm text-black">{order.payment?.method}</span></p>
               <p>
-                <span className="text-gray-500 font-dm text-[#3A3A3AB2]">Method:</span>{" "}
-                <span className="font-dm text-black">{order.payment?.method}</span>
-              </p>
-              <p>
-                <span className="text-gray-500 font-dm text-[#3A3A3AB2]">Status:</span>{" "}
-                <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold ml-2">
-                  {order.payment?.status}
-                </span>
+                <span className="text-gray-500 font-dm text-[#3A3A3AB2]">Status:</span>
+                <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold ml-2">{order.payment?.status}</span>
               </p>
               <p className="pt-2">
-                <span className="text-gray-500 font-dm text-[#3A3A3AB2]">Total:</span>{" "}
+                <span className="text-gray-500 font-dm text-[#3A3A3AB2]">Total:</span>
                 <span className="text-xl text-black font-bold font-dm">₦{order.payment?.total}</span>
               </p>
             </div>
@@ -294,10 +484,7 @@ export default function OrderDetailInfo() {
 
         {/* Ordered Items */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border">
-          <h2 className="text-[20px] font-dm text-[#A61E30] font-bold mb-5">
-            ORDERED ITEMS
-          </h2>
-
+          <h2 className="text-[20px] font-dm text-[#A61E30] font-bold mb-5">ORDERED ITEMS</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-[#F6E9EA] text-gray-600">
@@ -308,7 +495,6 @@ export default function OrderDetailInfo() {
                   <th className="text-right px-4 py-3 rounded-r-lg">Subtotal</th>
                 </tr>
               </thead>
-
               <tbody className="divide-y divide-gray-50">
                 {order.items?.map((item, index) => (
                   <tr key={index} className="text-black">
@@ -325,22 +511,20 @@ export default function OrderDetailInfo() {
 
         {/* Status Actions */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border">
-          <h2 className="text-[20px] font-dm font-bold text-[#A61E30] mb-5">
-            UPDATE STATUS
-          </h2>
-
+          <h2 className="text-[20px] font-dm font-bold text-[#A61E30] mb-5">UPDATE STATUS</h2>
           <div className="flex flex-wrap gap-3">
-            {statuses.map((status) => (
+            {statusConfig.map((status) => (
               <button
-                key={status}
-                onClick={() => setCurrentStatus(status)}
+                key={status.key}
+                disabled={updating}
+                onClick={() => handleStatusUpdate(status.label, status.key)}
                 className={`px-4 py-2 text-sm transition font-dm rounded-[40px] rounded-tl-[5px] ${
-                  currentStatus === status
+                  currentStatus === status.label
                     ? "bg-[#A61E30] text-white"
                     : "bg-[#F3E9B530] border text-gray-700 hover:bg-gray-200"
-                }`}
+                } ${updating ? "opacity-50 cursor-not-allowed" : ""}`}
               >
-                {status}
+                {status.label}
               </button>
             ))}
           </div>
