@@ -252,11 +252,26 @@ export const updateMenuItem = async (id, formData) => {
 
 
 
-export const updateOrderStatus = async (orderId, status) => {
+// export const updateOrderStatus = async (orderId, status) => {
+//   try {
+//     const response = await adminApi.post("/admin/orders/update-status", {
+//       order_id: orderId,
+//       status: status,
+//     });
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error updating status:", error.response?.data || error.message);
+//     throw error;
+//   }
+// };
+
+
+export const updateOrderStatus = async (orderId, status, reason = "") => {
   try {
     const response = await adminApi.post("/admin/orders/update-status", {
       order_id: orderId,
-      status: status,
+      status: status, // This remains a string
+      cancellation_reason: reason, // Added this field
     });
     return response.data;
   } catch (error) {
