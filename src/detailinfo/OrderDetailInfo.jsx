@@ -525,13 +525,13 @@ export default function OrderDetailInfo() {
     { label: "Out for Delivery", key: "out_for_delivery", color: "bg-orange-100 text-orange-700 border-orange-200" },
     { label: "Delivered", key: "delivered", color: "bg-green-100 text-green-700 border-green-200" },
     // ADDED: Canceled Status
-    { label: "Canceled", key: "canceled", color: "bg-red-100 text-red-700 border-red-200" },
+    { label: "Canceled", key: "cancelled", color: "bg-red-100 text-red-700 border-red-200" },
   ];
 
   const [currentStatus, setCurrentStatus] = useState(null);
 
   // UPDATED: Disable if delivered OR canceled
-  const isFinalStatus = currentStatus?.key === "delivered" || currentStatus?.key === "canceled";
+  const isFinalStatus = currentStatus?.key === "delivered" || currentStatus?.key === "cancelled";
 
   useEffect(() => {
     const fetchOrderDetail = async () => {
