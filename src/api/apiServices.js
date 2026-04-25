@@ -819,3 +819,58 @@ export const resetPassword = async (data) => {
   const res = await apiClient.post("/auth/reset-password", data);
   return res.data;
 };
+
+
+
+
+
+
+
+// ------------------- CATEGORY MANAGEMENT -------------------
+
+/**
+ * Fetches all categories
+ * Endpoint: GET /admin/category-management
+ */
+export const getAllCategories = async () => {
+  const response = await adminApi.get("/admin/category-management");
+  return response.data;
+};
+
+/**
+ * Adds a new category (includes image upload)
+ * Endpoint: POST /admin/category-management
+ * @param {FormData} formData - Contains 'name' and 'image'
+ */
+export const addCategory = async (formData) => {
+  const response = await adminApi.post("/admin/category-management", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
+/**
+ * Updates an existing category
+ * Endpoint: POST /admin/category-management (with _method=PUT)
+ * @param {FormData} formData - Contains 'name', 'image', and 'category_id'
+ */
+export const updateCategory = async (formData) => {
+  // Using POST with _method=PUT is the standard way to handle multipart updates in Laravel
+  const response = await adminApi.post("/admin/category-management", formData, {
+    params: { _method: 'PUT' }, 
+    headers: { 
+      "Content-Type": "multipart/form-data",
+      Accept: "application/json" 
+    },
+  });
+  return response.data;
+};
+
+/**
+ * Deletes a category
+ * Endpoint: DELETE /admin/category-management/{id}
+ */
+export const deleteCategory = async (id) => {
+  const response = await adminApi.delete(`/admin/category-management/${id}`);
+  return response.data;
+};

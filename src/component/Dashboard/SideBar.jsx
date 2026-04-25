@@ -64,6 +64,11 @@ export default function Sidebar({ mobile = false }) {
       label: "Analytics",
       icon: BarChart3,
     },
+    {
+      to: "/dashboard/categories",
+      label: "Categories",
+      icon: BarChart3,
+    },
   ];
 
   const handleLogout = async () => {

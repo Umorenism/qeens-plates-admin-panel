@@ -82,6 +82,7 @@ import AdminPermission from "./pages/AdminPermission";
 import ForgetPassword from "./component/Auth/Forget";
 import NotificationsPage from "./pages/Notifications";
 import ResetPassword from "./component/Auth/ResetPassword";
+import AdminCategories from "./pages/AdminCategories";
 
 export default function App() {
   const { user } = useAuth();
@@ -113,6 +114,7 @@ export default function App() {
         <Route path="order/:id" element={<OrderDetailInfo />} />
         <Route path="customers/:id" element={<CustomerslInfo />} />
         <Route path="notifications" element={<NotificationsPage />} />
+        <Route path="categories" element={<AdminCategories/>} />
 
         {/* Strict Conditional Routing: 
             The routes are rendered based on the reactive 'userRole'.
