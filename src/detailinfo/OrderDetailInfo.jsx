@@ -182,7 +182,7 @@ export default function OrderDetailInfo() {
             <div className="mb-6 p-5 bg-gray-50 border rounded-xl animate-in fade-in slide-in-from-top-2">
               <label className="block text-sm font-bold text-gray-700 mb-2 font-dm">Please provide a reason for cancellation:</label>
               <textarea 
-                className="w-full p-3 border rounded-lg focus:ring-1 focus:ring-[#A61E30] outline-none text-sm font-dm"
+                className="w-full bg-transparent p-3 border rounded-lg focus:ring-1 focus:ring-[#A61E30] outline-none text-gray-700 text-sm font-dm"
                 placeholder="e.g. Out of stock, Out of delivery range..."
                 value={cancelReason}
                 onChange={(e) => setCancelReason(e.target.value)}
