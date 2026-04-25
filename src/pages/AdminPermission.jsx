@@ -1557,7 +1557,7 @@ export default function AdminPermission() {
                   onChange={handleInputChange}
                   placeholder="Full Name"
                   required
-                  className="px-4 py-2 w-full border shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px]"
+                  className="px-4 bg-transparent py-2 w-full border border-[#A61E30] shadow-sm text-gray-700 outline-none rounded-[40px] rounded-tl-[5px]"
                 />
 
                 <input
@@ -1566,7 +1566,7 @@ export default function AdminPermission() {
                   onChange={handleInputChange}
                   placeholder="Email Address"
                   required
-                  className="px-4 py-2 w-full border shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px]"
+                  className="px-4 py-2 w-full border shadow-sm bg-transparent border-[#A61E30] text-gray-700 outline-none rounded-[40px] rounded-tl-[5px]"
                 />
 
                 <input
@@ -1575,7 +1575,7 @@ export default function AdminPermission() {
                   onChange={handleInputChange}
                   placeholder="Phone Number"
                   required
-                  className="px-4 py-2 w-full border shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px]"
+                  className="px-4 py-2 w-full border border-[#A61E30] bg-transparent shadow-sm text-gray-700 outline-none rounded-[40px] rounded-tl-[5px]"
                 />
 
                 {/* PASSWORD FIELD */}
@@ -1596,7 +1596,7 @@ export default function AdminPermission() {
                         : "Password"
                     }
                     required={!editingId}
-                    className="px-4 py-2 w-full border shadow-sm text-gray-500 outline-none rounded-[40px] rounded-tl-[5px]"
+                    className="px-4 py-2 w-full border border-[#A61E30] bg-transparent shadow-sm text-gray-700 outline-none rounded-[40px] rounded-tl-[5px]"
                   />
 
                   <button
