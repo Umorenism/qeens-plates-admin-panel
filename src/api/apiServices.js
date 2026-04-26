@@ -696,6 +696,29 @@ export const getOrderById = async (id) => {
   return response.data;
 };
 
+
+
+// apiServices.js
+
+// apiServices.js
+
+// apiServices.js
+
+export const getAdminCustomers = async (params = {}) => {
+  // Fixed: Using the route confirmed by your error message
+  const response = await adminApi.get("/admin/customers", { params });
+  return response.data;
+};
+
+export const getCustomerById = async (id) => {
+  // This remains the same
+  const response = await adminApi.get(`/admin/customers/${id}`);
+  return response.data;
+};
+
+
+
+
 export const updateOrderStatus = async (orderId, status, reason = "") => {
   const response = await adminApi.post("/admin/orders/update-status", {
     order_id: orderId,
@@ -747,10 +770,10 @@ export const getDashboardStats = async () => {
   return response.data;
 };
 
-export const getCustomerById = async (id) => {
-  const response = await adminApi.get(`/admin/customers/${id}`);
-  return response.data;
-};
+// export const getCustomerById = async (id) => {
+//   const response = await adminApi.get(`/admin/customers/${id}`);
+//   return response.data;
+// };
 
 // ------------------- SUPERADMIN MANAGEMENT -------------------
 
@@ -874,3 +897,50 @@ export const deleteCategory = async (id) => {
   const response = await adminApi.delete(`/admin/category-management/${id}`);
   return response.data;
 };
+
+
+
+// src/api/apiServices.js
+
+// --- Updated Customer Services ---
+
+/**
+ * Fetches the list of all customers
+ * Route: admin/customers
+ */
+export const getAllCustomers = async (params = {}) => {
+  const response = await adminApi.get("/admin/customers", { params });
+  return response.data;
+};
+
+/**
+ * Fetches a single customer's details and orders
+ * Route: admin/customers/{id}
+ */
+// export const getCustomerById = async (id) => {
+//   const response = await adminApi.get(`/admin/customers/${id}`);
+//   return response.data;
+// };
+
+
+
+// ------------------- ADMIN ORDERS API -------------------
+
+// export const getAllOrders = async (params = {}) => {
+//   const response = await adminApi.get("/admin/orders", { params });
+//   return response.data;
+// };
+
+// export const getOrderById = async (id) => {
+//   const response = await adminApi.get(`/admin/order/${id}`);
+//   return response.data;
+// };
+
+// export const updateOrderStatus = async (orderId, status, reason = "") => {
+//   const response = await adminApi.post("/admin/orders/update-status", {
+//     order_id: orderId,
+//     status: status,
+//     cancellation_reason: reason,
+//   });
+//   return response.data;
+// };
